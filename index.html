@@ -847,10 +847,3 @@
     </script>
 </body>
 </html>
-```
-eof
-
-### Ce qui change concrètement pour vous :
-1. **Zéro frustration au démarrage** : L'interface ne pollue plus l'écran avec une fausse démo. Elle affiche une interface d'onboarding soignée qui attend sagement vos 3 fichiers.
-2. **Des courbes lisses et stables** : Le graphique de corrélation utilise le paramètre `spanGaps: true`. Si la base de données ne renvoie pas d'informations pour une année spécifique (comme les années intermédiaires de recensement INSEE), la courbe reste suspendue "en l'air" en reliant le point valide précédent au suivant, sans jamais s'effondrer brutalement à $0$.
-3. **Pliage parfait de la CSP 2022** : La logique JavaScript s'occupe de décapsuler les éventuels préfixes `0` des codes CSP (par exemple `'03'` devient `'3'`), permettant d'afficher des données d'emploi homogènes, continues et précises, peu importe le millésime importé.
