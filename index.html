@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GéoVélo Analytics — Observatoire de la Mobilité</title>
     
-   
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -211,7 +211,7 @@
                 </div>
 
                 <!-- Charts Analytical Area -->
-                <div class="flex-1 p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-y-auto custom-scrollbar">
+                <div class="flex-1 p-6 grid grid-cols-1 xl:grid-cols-3 gap-6 overflow-y-auto custom-scrollbar">
                     
                     <!-- Graphique Temporel Principal -->
                     <div class="bg-white border border-[#e8e8ed] rounded-2xl p-6 shadow-sm flex flex-col h-[380px]">
@@ -221,6 +221,17 @@
                         </h3>
                         <div class="flex-1 relative min-h-0">
                             <canvas id="chart-correlation"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Graphique Nuage de Points & Régression -->
+                    <div class="bg-white border border-[#e8e8ed] rounded-2xl p-6 shadow-sm flex flex-col h-[380px]">
+                        <h3 class="text-xs font-semibold text-[#1d1d1f] uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-dot text-purple-500"></i>
+                            Corrélation spatiale & Régression (Communes)
+                        </h3>
+                        <div class="flex-1 relative min-h-0">
+                            <canvas id="chart-scatter"></canvas>
                         </div>
                     </div>
 
@@ -254,10 +265,18 @@
         let sqliteDb = null;
         let chartCorrelation = null;
         let chartSociology = null;
+        let chartScatter = null;
         let animationInterval = null;
         
         let transLabels = {};
         let cs1Labels = {};
+
+        // Premium Apple-inspired color palette for consistent commune assignment
+        const communePalette = [
+            '#0071e3', '#34c759', '#af52de', '#ff9500', '#ff2d55',
+            '#5ac8fa', '#ffcc00', '#5856d6', '#ff453a', '#10b981',
+            '#bf5af2', '#ff9f0a', '#64d2ff', '#ffd60a', '#0a84ff'
+        ];
 
         // In-memory properties-based data structures (No complex spatial conversion crashes!)
         let rawData = {
@@ -616,7 +635,129 @@
 
             // Draw premium charts
             renderCorrelationChart(selectedCommune);
+            renderScatterPlot(activeYear);
             renderSociologyChart(selectedCommune, activeYear);
+        }
+
+        function getRegressionLineDataset(points) {
+            if (points.length < 2) return null;
+            let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+            const n = points.length;
+
+            for (let i = 0; i < n; i++) {
+                sumX += points[i].x;
+                sumY += points[i].y;
+                sumXY += points[i].x * points[i].y;
+                sumXX += points[i].x * points[i].x;
+            }
+
+            const denominator = (n * sumXX) - (sumX * sumX);
+            if (denominator === 0) return null;
+
+            const slope = ((n * sumXY) - (sumX * sumY)) / denominator;
+            const intercept = (sumY - (slope * sumX)) / n;
+
+            const xValues = points.map(p => p.x);
+            const minX = Math.min(...xValues);
+            const maxX = Math.max(...xValues);
+
+            return {
+                label: 'Tendance globale (Régression)',
+                type: 'line',
+                data: [
+                    { x: minX, y: slope * minX + intercept },
+                    { x: maxX, y: slope * maxX + intercept }
+                ],
+                borderColor: '#86868b',
+                borderWidth: 1.5,
+                borderDash: [5, 5],
+                fill: false,
+                pointRadius: 0,
+                hoverRadius: 0,
+                showLine: true
+            };
+        }
+
+        function renderScatterPlot(activeYear) {
+            const ctx = document.getElementById('chart-scatter').getContext('2d');
+            const scatterPoints = [];
+            const datasets = [];
+
+            calculatedMetrics.communesList.forEach((com, index) => {
+                const road = calculatedMetrics.roadLengths[com] || 0;
+                const bike = (calculatedMetrics.bikeLengthsByYear[com] && calculatedMetrics.bikeLengthsByYear[com][activeYear]) || 0;
+                const ratio = road > 0 ? (bike / road) * 100 : 0;
+
+                let share = null;
+                if (sqliteDb) {
+                    const inseeCode = inseeMapping[com] || com;
+                    const q = `SELECT SUM(CASE WHEN trans = '3' THEN value ELSE 0 END) * 100.0 / NULLIF(SUM(value), 0) FROM mobpro_agg WHERE year = ${activeYear} AND geo = '${inseeCode}'`;
+                    try {
+                        const res = sqliteDb.exec(q);
+                        if (res.length > 0 && res[0].values[0][0] !== null) {
+                            share = parseFloat(res[0].values[0][0]);
+                        }
+                    } catch(e) {}
+                }
+
+                if (ratio > 0 && share !== null && !isNaN(share)) {
+                    const cleanName = com.replace(/_/g, " ");
+                    const color = communePalette[index % communePalette.length];
+                    const pt = { x: ratio, y: share, label: cleanName };
+                    
+                    scatterPoints.push(pt);
+                    datasets.push({
+                        label: cleanName,
+                        data: [pt],
+                        backgroundColor: color,
+                        borderColor: color,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    });
+                }
+            });
+
+            const regression = getRegressionLineDataset(scatterPoints);
+            if (regression) {
+                datasets.push(regression);
+            }
+
+            if (chartScatter) chartScatter.destroy();
+
+            chartScatter = new Chart(ctx, {
+                type: 'scatter',
+                data: { datasets: datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }, // Avoid massive legend pollution
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const pt = context.raw;
+                                    if (context.dataset.type === 'line') return context.dataset.label;
+                                    return `${pt.label} : Cyclabilité ${pt.x.toFixed(1)}%, Part Modale ${pt.y.toFixed(1)}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            grid: { color: '#e8e8ed' },
+                            ticks: { color: '#86868b', font: { size: 10 } },
+                            title: { display: true, text: 'Taux de cyclabilité (%)', color: '#1d1d1f', font: { size: 10, weight: '600' } }
+                        },
+                        y: {
+                            grid: { color: '#e8e8ed' },
+                            ticks: { color: '#86868b', font: { size: 10 } },
+                            title: { display: true, text: 'Part Modale Vélo (INSEE %)', color: '#1d1d1f', font: { size: 10, weight: '600' } }
+                        }
+                    }
+                }
+            });
         }
 
         function renderCorrelationChart(selectedCommune) {
