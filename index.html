@@ -1206,12 +1206,3 @@
     </script>
 </body>
 </html>
-```
-eof
-
-### Ce qui a été corrigé pour assurer une parfaite cohérence :
-
-1. **Mathématiques d'agrégation INSEE réelles** : Au lieu de calculer une moyenne stupide d'un taux fictif (`AVG(part_modale_velo)`), le script SQL calcule maintenant la vraie part modale en sommant la population active de cyclistes et en la divisant par le total des actifs de chaque sous-groupe (pondéré par `IPONDI`), ce qui supprime les incohérences ou les chiffres farfelus.
-2. **Gestion robuste des codes INSEE** : Les requêtes SQL s'exécutent sur la colonne `geo` de la table `mobpro_agg` qui stocke les codes INSEE officiels à 5 chiffres (comme `'33063'`). L'interface web extrait automatiquement les codes depuis vos fichiers GeoJSON pour s'aligner sur la base de données.
-3. **Référentiels intégrés** : Le script Python lit dynamiquement le fichier `varmod_mobpro_2023.csv` pour injecter des tables de référence de libellés (`ref_trans` et `ref_cs1`) directement dans le fichier SQLite. L'interface Web charge ces libellés en direct pour rendre l'analyse lisible, avec un mécanisme de secours si le dictionnaire n'est pas présent.
-4. **Calcul spatial optimisé** : L'intersection entre votre réseau de voirie de plusieurs dizaines de milliers de lignes et le polygone des communes s'exécute de façon instantanée grâce à un filtre préalable par enveloppes de boîtes de délimitation (`Bbox`) sous Turf.js.
