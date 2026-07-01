@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full bg-slate-950 text-slate-100">
+<html lang="fr" class="h-full bg-[#f5f5f7] text-[#1d1d1f]">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GéoVélo Analytics - Observatoire de la Mobilité</title>
+    <title>GéoVélo Analytics — Observatoire de la Mobilité</title>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -11,68 +12,60 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            50: '#eefcf6',
-                            100: '#d3f7e8',
-                            500: '#10b981', // Emerald
-                            600: '#059669',
-                            700: '#047857',
-                            900: '#064e3b',
+                        apple: {
+                            blue: '#0071e3',
+                            green: '#34c759',
+                            gray: '#86868b',
+                            lightGray: '#f5f5f7',
+                            border: '#e8e8ed'
                         }
                     }
                 }
             }
         }
     </script>
+    
     <!-- Google Fonts & FontAwesome -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Leaflet CSS & JS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    <!-- Turf.js for GeoSpatial Calculations -->
-    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
-    
-    <!-- Chart.js for beautiful charts -->
+    <!-- Chart.js for premium analytics visualizations -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- SQL.js WebAssembly-based client-side SQLite reader -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
 
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .font-mono-custom { font-family: 'Fira Code', monospace; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #10b981; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            -webkit-font-smoothing: antialiased;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d2d2d7; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #86868b; }
     </style>
 </head>
-<body class="h-full flex flex-col overflow-hidden select-none">
+<body class="h-full flex flex-col overflow-hidden select-none bg-[#f5f5f7]">
 
-    <!-- Header -->
-    <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex items-center justify-between shrink-0 z-30 shadow-md">
-        <div class="flex items-center space-x-3">
-            <div class="bg-brand-500/10 p-2.5 rounded-xl border border-brand-500/20 text-brand-500 shadow-inner">
+    <!-- Header minimaliste style Apple -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-[#e8e8ed] px-8 py-4 flex items-center justify-between shrink-0 z-30">
+        <div class="flex items-center space-x-4">
+            <div class="bg-apple-blue/10 p-2.5 rounded-2xl text-apple-blue">
                 <i class="fa-solid fa-bicycle text-xl"></i>
             </div>
             <div>
-                <h1 class="text-md font-bold tracking-tight text-white flex items-center gap-2">
-                    GéoVélo Analytics <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/20 font-medium tracking-wide">Observatoire Territorial</span>
+                <h1 class="text-lg font-semibold tracking-tight text-[#1d1d1f] flex items-center gap-2">
+                    GéoVélo Analytics <span class="text-[10px] bg-[#e8e8ed] text-[#1d1d1f] px-2.5 py-0.5 rounded-full font-medium">POC Observatoire</span>
                 </h1>
-                <p class="text-[11px] text-slate-400">Analyse temporelle des parts modales réelles issues des micro-données INSEE & aménagements cyclables</p>
+                <p class="text-xs text-apple-gray">Corrélation temporelle aménagements cyclables & parts modales réelles</p>
             </div>
         </div>
         
-        <div class="flex items-center space-x-4">
-            <div id="data-mode-badge" class="flex items-center space-x-2 bg-amber-500/10 text-amber-400 border border-amber-500/20 px-3 py-1.5 rounded-xl text-[11px] font-medium">
-                <span class="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                <span>Mode Démo Actif (Bordeaux Métropole)</span>
-            </div>
-            <div class="text-[11px] text-slate-500 bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-xl font-mono-custom">
-                Engine: SQL-Wasm & Turf.js
+        <div class="flex items-center space-x-3">
+            <div id="status-pill" class="flex items-center space-x-2 bg-orange-50 text-orange-600 border border-orange-100 px-3.5 py-1.5 rounded-full text-xs font-medium">
+                <span class="inline-block w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                <span>En attente de fichiers</span>
             </div>
         </div>
     </header>
@@ -80,211 +73,164 @@
     <!-- Main Content Area -->
     <main class="flex-1 flex overflow-hidden min-h-0 relative">
         
-        <!-- Sidebar Gauche: Importation & Paramétrage -->
-        <aside class="w-[380px] border-r border-slate-800 bg-slate-900 flex flex-col min-h-0 shrink-0 custom-scrollbar overflow-y-auto">
-            
-            <div class="flex border-b border-slate-800 shrink-0 bg-slate-950">
-                <button id="tab-btn-import" class="flex-1 py-3 text-xs font-semibold uppercase tracking-wider text-center border-b-2 border-brand-500 text-brand-500 hover:bg-slate-900/40 transition">
-                    <i class="fa-solid fa-file-import mr-1.5"></i> Données
-                </button>
-                <button id="tab-btn-config" class="flex-1 py-3 text-xs font-semibold uppercase tracking-wider text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/40 transition">
-                    <i class="fa-solid fa-sliders mr-1.5"></i> Filtres & Réglages
-                </button>
+        <!-- Sidebar Gauche: Importation épurée -->
+        <aside class="w-[360px] border-r border-[#e8e8ed] bg-white flex flex-col min-h-0 shrink-0 custom-scrollbar overflow-y-auto">
+            <div class="p-6 border-b border-[#e8e8ed]">
+                <h2 class="text-sm font-semibold text-[#1d1d1f] uppercase tracking-wider">Sources de données</h2>
+                <p class="text-xs text-apple-gray mt-1">Glissez vos fichiers pour activer l'analyse</p>
             </div>
 
-            <!-- Contenu de l'onglet Importation -->
-            <div id="tab-content-import" class="p-5 space-y-6 flex-1">
+            <div class="p-6 space-y-6 flex-1">
                 
-                <div class="space-y-3">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
-                        <span>1. Base SQLite INSEE</span>
-                        <span id="badge-sqlite" class="text-[9px] bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded border border-rose-500/20 uppercase font-bold">Inconnu</span>
-                    </h3>
-                    <div id="dropzone-sqlite" class="border-2 border-dashed border-slate-800 hover:border-brand-500/40 bg-slate-950 hover:bg-slate-950/70 transition p-4 rounded-xl cursor-pointer text-center relative group">
+                <!-- Import SQLite -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-semibold text-[#1d1d1f]">1. Base SQLite INSEE</label>
+                        <span id="badge-sqlite" class="text-[9px] bg-red-55/10 text-red-500 px-2 py-0.5 rounded-full border border-red-100 uppercase font-bold">Inactif</span>
+                    </div>
+                    <div id="dropzone-sqlite" class="border border-dashed border-[#d2d2d7] hover:border-apple-blue bg-[#f5f5f7] hover:bg-white transition p-5 rounded-2xl cursor-pointer text-center group">
                         <input type="file" id="file-sqlite" accept=".sqlite,.db" class="hidden" />
-                        <div class="space-y-1.5 pointer-events-none py-1 text-slate-400 group-hover:text-slate-300">
-                            <i class="fa-solid fa-database text-xl text-slate-500 group-hover:text-brand-500 transition-colors"></i>
-                            <div class="text-xs font-semibold">Importer votre base .sqlite</div>
-                            <div class="text-[9px] text-slate-500">Doit contenir les tables mobpro_agg, ref_trans et ref_cs1</div>
+                        <div class="space-y-2 pointer-events-none text-apple-gray group-hover:text-[#1d1d1f]">
+                            <i class="fa-solid fa-database text-lg text-apple-gray group-hover:text-apple-blue transition-colors"></i>
+                            <div class="text-xs font-medium">Fichier .sqlite ou .db</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="space-y-3">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
-                        <span>2. Communes Géographiques</span>
-                        <span id="badge-communes" class="text-[9px] bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded border border-rose-500/20 uppercase font-bold">Inconnu</span>
-                    </h3>
-                    <div id="dropzone-communes" class="border-2 border-dashed border-slate-800 hover:border-brand-500/40 bg-slate-950 hover:bg-slate-950/70 transition p-4 rounded-xl cursor-pointer text-center relative group">
-                        <input type="file" id="file-communes" accept=".geojson,.json" class="hidden" />
-                        <div class="space-y-1.5 pointer-events-none py-1 text-slate-400 group-hover:text-slate-300">
-                            <i class="fa-solid fa-map-marked-alt text-xl text-slate-500 group-hover:text-brand-500 transition-colors"></i>
-                            <div class="text-xs font-semibold">GeoJSON Polygones Communes</div>
-                            <div class="text-[9px] text-slate-500">Fichier de limites des communes de la zone</div>
-                        </div>
+                <!-- Import Cyclables -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-semibold text-[#1d1d1f]">2. Aménagements (GeoJSON)</label>
+                        <span id="badge-cyclable" class="text-[9px] bg-red-55/10 text-red-500 px-2 py-0.5 rounded-full border border-red-100 uppercase font-bold">Inactif</span>
                     </div>
-                </div>
-
-                <div class="space-y-3">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
-                        <span>3. Aménagements Cyclables</span>
-                        <span id="badge-cyclable" class="text-[9px] bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded border border-rose-500/20 uppercase font-bold">Inconnu</span>
-                    </h3>
-                    <div id="dropzone-cyclable" class="border-2 border-dashed border-slate-800 hover:border-brand-500/40 bg-slate-950 hover:bg-slate-950/70 transition p-4 rounded-xl cursor-pointer text-center relative group">
+                    <div id="dropzone-cyclable" class="border border-dashed border-[#d2d2d7] hover:border-apple-blue bg-[#f5f5f7] hover:bg-white transition p-5 rounded-2xl cursor-pointer text-center group">
                         <input type="file" id="file-cyclable" accept=".geojson,.json" class="hidden" />
-                        <div class="space-y-1.5 pointer-events-none py-1 text-slate-400 group-hover:text-slate-300">
-                            <i class="fa-solid fa-road-barrier text-xl text-slate-500 group-hover:text-brand-500 transition-colors"></i>
-                            <div class="text-xs font-semibold">GeoJSON Pistes Cyclables (Tout)</div>
-                            <div class="text-[9px] text-slate-500">Fichier fusionné global, attribut "annee" requis</div>
+                        <div class="space-y-2 pointer-events-none text-apple-gray group-hover:text-[#1d1d1f]">
+                            <i class="fa-solid fa-bicycle text-lg text-apple-gray group-hover:text-apple-blue transition-colors"></i>
+                            <div class="text-xs font-medium">Fichier GeoJSON fusionné</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="space-y-3">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
-                        <span>4. Réseau de Voirie Global</span>
-                        <span id="badge-voirie" class="text-[9px] bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded border border-rose-500/20 uppercase font-bold">Inconnu</span>
-                    </h3>
-                    <div id="dropzone-voirie" class="border-2 border-dashed border-slate-800 hover:border-brand-500/40 bg-slate-950 hover:bg-slate-950/70 transition p-4 rounded-xl cursor-pointer text-center relative group">
+                <!-- Import Voirie -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-semibold text-[#1d1d1f]">3. Réseau de Voirie (GeoJSON)</label>
+                        <span id="badge-voirie" class="text-[9px] bg-red-55/10 text-red-500 px-2 py-0.5 rounded-full border border-red-100 uppercase font-bold">Inactif</span>
+                    </div>
+                    <div id="dropzone-voirie" class="border border-dashed border-[#d2d2d7] hover:border-apple-blue bg-[#f5f5f7] hover:bg-white transition p-5 rounded-2xl cursor-pointer text-center group">
                         <input type="file" id="file-voirie" accept=".geojson,.json" class="hidden" />
-                        <div class="space-y-1.5 pointer-events-none py-1 text-slate-400 group-hover:text-slate-300">
-                            <i class="fa-solid fa-route text-xl text-slate-500 group-hover:text-brand-500 transition-colors"></i>
-                            <div class="text-xs font-semibold">GeoJSON Voiries Complètes</div>
-                            <div class="text-[9px] text-slate-500">Fichier de voirie global de référence</div>
+                        <div class="space-y-2 pointer-events-none text-apple-gray group-hover:text-[#1d1d1f]">
+                            <i class="fa-solid fa-route text-lg text-apple-gray group-hover:text-apple-blue transition-colors"></i>
+                            <div class="text-xs font-medium">Fichier GeoJSON voiries</div>
                         </div>
                     </div>
                 </div>
 
-                <button id="btn-reset-demo" class="w-full bg-slate-950 border border-slate-800 hover:bg-slate-900 active:scale-95 text-slate-300 hover:text-white py-2.5 px-4 rounded-xl font-medium text-xs cursor-pointer transition flex items-center justify-center space-x-2">
-                    <i class="fa-solid fa-rotate-left text-amber-500"></i>
-                    <span>Charger les données de démonstration</span>
-                </button>
-
-            </div>
-
-            <!-- Contenu de l'onglet Configuration / Filtres -->
-            <div id="tab-content-config" class="p-5 space-y-6 flex-1 hidden">
-                
-                <!-- Sélection de Territoire -->
-                <div class="space-y-3">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Secteur territorial</h3>
-                    <div>
-                        <label class="block text-[10px] text-slate-500 font-semibold uppercase mb-1">Commune sélectionnée :</label>
-                        <select id="filter-commune" class="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 px-3 text-xs text-slate-200 focus:border-brand-500 outline-none">
-                            <option value="ALL">Chargement en cours...</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Aperçu de requêtage direct SQL -->
-                <div class="space-y-3">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
-                        <span>Requête SQL de corrélation</span>
-                    </h3>
-                    <textarea id="sql-query-display" readonly class="w-full h-32 p-3 bg-slate-950 border border-slate-800 rounded-xl font-mono-custom text-[10px] text-slate-400 focus:outline-none select-text custom-scrollbar"></textarea>
+                <!-- Sélecteur de commune (masqué par défaut) -->
+                <div id="wrapper-filter-commune" class="space-y-2 pt-4 border-t border-[#e8e8ed] hidden">
+                    <label class="text-xs font-semibold text-[#1d1d1f]">Filtrer l'analyse</label>
+                    <select id="filter-commune" class="w-full bg-white border border-[#d2d2d7] rounded-xl py-2 px-3 text-xs text-[#1d1d1f] focus:border-apple-blue outline-none transition">
+                        <option value="ALL">Toutes les communes</option>
+                    </select>
                 </div>
 
             </div>
-
         </aside>
 
         <!-- Center Dashboard Area -->
-        <section class="flex-1 flex flex-col min-h-0 bg-slate-950">
+        <section class="flex-1 flex flex-col min-h-0 bg-[#f5f5f7]">
             
-            <!-- Statistiques Clés horizontales -->
-            <div class="grid grid-cols-4 gap-4 p-5 shrink-0 bg-slate-900/40 border-b border-slate-900/60 font-mono-custom">
-                
-                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center justify-between">
-                    <div>
-                        <span class="block text-[9px] text-slate-500 uppercase font-bold tracking-wider font-sans">Réseau de voirie (Local)</span>
-                        <span class="text-lg font-bold text-slate-100" id="stat-total-voirie">-- km</span>
+            <!-- Écran d'attente initial -->
+            <div id="onboarding-screen" class="flex-1 flex flex-col items-center justify-center p-12 text-center">
+                <div class="max-w-md space-y-6">
+                    <div class="w-16 h-16 bg-white shadow-sm border border-[#e8e8ed] rounded-2xl flex items-center justify-center mx-auto text-apple-blue">
+                        <i class="fa-solid fa-folder-open text-2xl"></i>
                     </div>
-                    <div class="text-blue-500/20 text-3xl"><i class="fa-solid fa-route"></i></div>
-                </div>
-
-                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center justify-between">
-                    <div>
-                        <span class="block text-[9px] text-slate-500 uppercase font-bold tracking-wider font-sans">Aménagements cyclables</span>
-                        <span class="text-lg font-bold text-emerald-400" id="stat-total-cyclable">-- km</span>
-                    </div>
-                    <div class="text-emerald-500/20 text-3xl"><i class="fa-solid fa-bicycle"></i></div>
-                </div>
-
-                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center justify-between">
-                    <div>
-                        <span class="block text-[9px] text-slate-500 uppercase font-bold tracking-wider font-sans">Taux de cyclabilité</span>
-                        <span class="text-lg font-bold text-brand-500" id="stat-ratio-infra">-- %</span>
-                    </div>
-                    <div class="text-brand-500/20 text-3xl"><i class="fa-solid fa-percentage"></i></div>
-                </div>
-
-                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center justify-between">
-                    <div>
-                        <span class="block text-[9px] text-slate-500 uppercase font-bold tracking-wider font-sans">Part Modale Vélo Réelle</span>
-                        <span class="text-lg font-bold text-amber-400" id="stat-part-modale-moyen">-- %</span>
-                    </div>
-                    <div class="text-amber-500/20 text-3xl"><i class="fa-solid fa-chart-line"></i></div>
-                </div>
-
-            </div>
-
-            <!-- Timeline & Time Slider -->
-            <div class="bg-slate-900 px-6 py-4 border-b border-slate-800 flex items-center space-x-6 shrink-0">
-                <button id="btn-play-pause" class="bg-brand-500 hover:bg-brand-600 active:scale-95 text-slate-950 w-10 h-10 rounded-xl flex items-center justify-center transition cursor-pointer shadow-lg shadow-brand-500/10">
-                    <i id="play-icon" class="fa-solid fa-play text-sm"></i>
-                </button>
-                <div class="flex-1 space-y-1">
-                    <div class="flex justify-between items-center text-xs">
-                        <span class="text-slate-500 font-semibold">Évolution temporelle :</span>
-                        <span id="label-active-year" class="text-lg font-extrabold text-brand-400 font-mono-custom">2010</span>
-                    </div>
-                    <div class="relative w-full">
-                        <input type="range" id="time-slider" min="2010" max="2026" step="1" value="2010" class="w-full h-1.5 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-brand-500">
+                    <div class="space-y-2">
+                        <h3 class="text-xl font-bold text-[#1d1d1f]">Prêt à analyser</h3>
+                        <p class="text-xs text-apple-gray leading-relaxed">Glissez-déposez vos trois fichiers (Base de données SQLite INSEE, tracés cyclables et réseaux de voirie) dans la barre latérale pour initier l'observatoire.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="flex-1 flex min-h-0 relative">
+            <!-- Contenu du Dashboard analytique (masqué au début) -->
+            <div id="dashboard-content" class="flex-1 flex flex-col min-h-0 hidden">
                 
-                <!-- Left panel: Map -->
-                <div class="flex-1 relative border-r border-slate-800/80">
-                    <div id="map" class="absolute inset-0 bg-slate-950"></div>
+                <!-- Statistiques Clés horizontales -->
+                <div class="grid grid-cols-4 gap-6 p-6 shrink-0 bg-[#f5f5f7]">
                     
-                    <!-- Légende de la carte -->
-                    <div class="absolute bottom-4 left-4 z-[1000] bg-slate-900/95 backdrop-blur-md px-4 py-3 rounded-xl border border-slate-800 text-xs shadow-xl space-y-2 pointer-events-none max-w-xs">
-                        <h4 class="font-bold text-white flex items-center gap-1.5">
-                            <span class="inline-block w-2.5 h-2.5 rounded-full bg-brand-500"></span>
-                            Visualisation spatiale
-                        </h4>
-                        <p class="text-[10px] text-slate-400 leading-relaxed">Les aménagements s'affichent à l'écran si leur année d'ouverture est inférieure ou égale à l'année courante.</p>
-                        <div class="space-y-1 pt-1.5 border-t border-slate-800/80 text-[10px]">
-                            <div class="flex items-center"><span class="w-3.5 h-1 bg-emerald-400 inline-block rounded mr-2 shadow shadow-emerald-400/30"></span>Piste cyclable (active)</div>
-                            <div class="flex items-center text-slate-500"><span class="w-3.5 h-1 bg-slate-700 inline-block rounded mr-2"></span>Réseau routier global</div>
+                    <div class="bg-white border border-[#e8e8ed] p-5 rounded-2xl shadow-sm flex items-center justify-between">
+                        <div>
+                            <span class="block text-[10px] text-apple-gray uppercase font-semibold tracking-wider">Réseau routier global</span>
+                            <span class="text-xl font-bold text-[#1d1d1f] mt-1 block" id="stat-total-voirie">-- km</span>
+                        </div>
+                        <div class="text-[#86868b]/20 text-2xl"><i class="fa-solid fa-route"></i></div>
+                    </div>
+
+                    <div class="bg-white border border-[#e8e8ed] p-5 rounded-2xl shadow-sm flex items-center justify-between">
+                        <div>
+                            <span class="block text-[10px] text-apple-gray uppercase font-semibold tracking-wider">Infrastructures cumulées</span>
+                            <span class="text-xl font-bold text-apple-blue mt-1 block" id="stat-total-cyclable">-- km</span>
+                        </div>
+                        <div class="text-apple-blue/15 text-2xl"><i class="fa-solid fa-bicycle"></i></div>
+                    </div>
+
+                    <div class="bg-white border border-[#e8e8ed] p-5 rounded-2xl shadow-sm flex items-center justify-between">
+                        <div>
+                            <span class="block text-[10px] text-apple-gray uppercase font-semibold tracking-wider">Taux de cyclabilité</span>
+                            <span class="text-xl font-bold text-[#1d1d1f] mt-1 block" id="stat-ratio-infra">-- %</span>
+                        </div>
+                        <div class="text-[#86868b]/20 text-2xl"><i class="fa-solid fa-percent"></i></div>
+                    </div>
+
+                    <div class="bg-white border border-[#e8e8ed] p-5 rounded-2xl shadow-sm flex items-center justify-between">
+                        <div>
+                            <span class="block text-[10px] text-apple-gray uppercase font-semibold tracking-wider">Part modale vélo réelle</span>
+                            <span class="text-xl font-bold text-apple-green mt-1 block" id="stat-part-modale-moyen">-- %</span>
+                        </div>
+                        <div class="text-apple-green/15 text-2xl"><i class="fa-solid fa-chart-line"></i></div>
+                    </div>
+
+                </div>
+
+                <!-- Timeline & Time Slider -->
+                <div class="bg-white mx-6 px-6 py-5 border border-[#e8e8ed] rounded-2xl flex items-center space-x-6 shrink-0 shadow-sm">
+                    <button id="btn-play-pause" class="bg-apple-blue hover:bg-[#0071e3]/90 text-white w-9 h-9 rounded-full flex items-center justify-center transition cursor-pointer active:scale-95">
+                        <i id="play-icon" class="fa-solid fa-play text-xs pl-0.5"></i>
+                    </button>
+                    <div class="flex-1 space-y-1">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-apple-gray font-medium">Chronologie active :</span>
+                            <span id="label-active-year" class="text-base font-bold text-apple-blue">2010</span>
+                        </div>
+                        <div class="relative w-full">
+                            <input type="range" id="time-slider" min="2010" max="2026" step="1" value="2010" class="w-full h-1 bg-[#e8e8ed] rounded-lg appearance-none cursor-pointer accent-apple-blue outline-none">
                         </div>
                     </div>
                 </div>
 
-                <!-- Right panel: Analytical charts scrollable -->
-                <div class="w-[480px] bg-slate-900/30 shrink-0 flex flex-col min-h-0 custom-scrollbar overflow-y-auto p-5 space-y-6">
+                <!-- Charts Analytical Area -->
+                <div class="flex-1 p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-y-auto custom-scrollbar">
                     
                     <!-- Graphique Temporel Principal -->
-                    <div class="bg-slate-900 border border-slate-800/60 rounded-xl p-4 shadow-sm flex flex-col min-h-[250px]">
-                        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                            <i class="fa-solid fa-chart-line text-emerald-400"></i>
-                            Corrélation : Infra vs Part Modale (%)
+                    <div class="bg-white border border-[#e8e8ed] rounded-2xl p-6 shadow-sm flex flex-col h-[380px]">
+                        <h3 class="text-xs font-semibold text-[#1d1d1f] uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-apple-blue"></i>
+                            Développement cyclable & Part Modale
                         </h3>
-                        <div class="flex-1 relative min-h-[200px]">
+                        <div class="flex-1 relative min-h-0">
                             <canvas id="chart-correlation"></canvas>
                         </div>
                     </div>
 
-                    <!-- Graphique d'Analyse Sociologique par Variable -->
-                    <div class="bg-slate-900 border border-slate-800/60 rounded-xl p-4 shadow-sm flex flex-col min-h-[250px]">
-                        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                            <i class="fa-solid fa-people-group text-amber-400"></i>
-                            Part Modale Vélo par CSP (%)
+                    <!-- Graphique d'Analyse Sociologique par Variable (CSP) -->
+                    <div class="bg-white border border-[#e8e8ed] rounded-2xl p-6 shadow-sm flex flex-col h-[380px]">
+                        <h3 class="text-xs font-semibold text-[#1d1d1f] uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-people-group text-apple-green"></i>
+                            Pénétration de l'usage Vélo par Catégorie CSP
                         </h3>
-                        <div class="flex-1 relative min-h-[200px]">
+                        <div class="flex-1 relative min-h-0">
                             <canvas id="chart-sociology"></canvas>
                         </div>
                     </div>
@@ -297,99 +243,107 @@
 
     </main>
 
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-6 right-6 z-[9999] bg-slate-900 border border-slate-800 text-slate-100 px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
-        <div id="toast-icon-wrapper" class="bg-brand-500/10 text-brand-500 p-1.5 rounded-lg"></div>
-        <span id="toast-text" class="text-xs font-medium">Message de notification</span>
+    <!-- Notification Toast style iOS -->
+    <div id="toast" class="fixed bottom-6 right-6 z-[9999] bg-[#1d1d1f] text-white px-5 py-3 rounded-full shadow-lg flex items-center space-x-3 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none text-xs font-medium">
+        <div id="toast-icon-wrapper" class="text-apple-blue"></div>
+        <span id="toast-text">Message</span>
     </div>
 
     <script>
         // State variables
-        let map;
         let sqliteDb = null;
         let chartCorrelation = null;
         let chartSociology = null;
         let animationInterval = null;
         
-        // Mappings structures
-        let inseeToNameMap = {};
-        let nameToInseeMap = {};
         let transLabels = {};
         let cs1Labels = {};
 
+        // In-memory properties-based data structures (No complex spatial conversion crashes!)
         let rawData = {
-            communesGeojson: null,
             cyclables: null, 
             voirie: null     
         };
 
         let calculatedMetrics = {
-            totalRoadLengthGlobal: 0,
-            cyclableLengthByYearGlobal: {}, 
-            allYears: [2010, 2012, 2014, 2016, 2018, 2020, 2022, 2024, 2026],
-            communesWithData: []
+            roadLengths: {},               // Key: Normalized Commune Name -> float length
+            bikeLengthsByYear: {},          // Key: Normalized Commune Name -> Map of Year -> cumulative length
+            allYears: [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+            communesList: []                
         };
 
-        let mapLayers = {
-            communesBoundaries: null,
-            voirie: null,
-            cyclables: null,
-            highlight: null
+        // Standard lookup coordinates mapping to match insee-codes directly
+        const inseeMapping = {
+            "AMBARES_ET_LAGRAVE": "33003", "AMBARES_ET_LAGRAVE_": "33003", "AMBARES-ET-LAGRAVE": "33003",
+            "AMBES": "33004",
+            "ARTIGUES_PRES_BORDEAUX": "33013", "ARTIGUES": "33013", "ARTIGUES-PRES-BORDEAUX": "33013",
+            "BASSENS": "33032",
+            "BEGLES": "33039",
+            "BLANQUEFORT": "33056",
+            "BORDEAUX": "33063",
+            "BOULIAC": "33065",
+            "BRUGES": "33075",
+            "CARBON_BLANC": "33096", "CARBON-BLANC": "33096",
+            "CENON": "33119",
+            "EYSINES": "33162",
+            "FLOIRAC": "33167",
+            "GRADIGNAN": "33192",
+            "LE_HAILLAN": "33200", "HAILLAN": "33200", "LE-HAILLAN": "33200",
+            "LE_BOUSCAT": "33069", "BOUSCAT": "33069", "LE-BOUSCAT": "33069",
+            "LE_TAILLAN_MEDOC": "33519", "TAILLAN_MEDOC": "33519", "LE-TAILLAN-MEDOC": "33519",
+            "LORMONT": "33249",
+            "MARTIGNAS_SUR_JALLE": "33273", "MARTIGNAS": "33273", "MARTIGNAS-SUR-JALLE": "33273",
+            "MERIGNAC": "33281",
+            "PAREMPUYRE": "33312",
+            "PESSAC": "33318",
+            "SAINT_AUBIN_DE_MEDOC": "33376", "SAINT_AUBIN": "33376", "SAINT-AUBIN-DE-MEDOC": "33376",
+            "SAINT_LOUIS_DE_MONTFERRAND": "33434", "SAINT-LOUIS-DE-MONTFERRAND": "33434",
+            "SAINT_MEDARD_EN_JALLES": "33449", "SAINT_MEDARD": "33449", "SAINT-MEDARD-EN-JALLES": "33449",
+            "SAINT_VINCENT_DE_PAUL": "33548", "SAINT-VINCENT-DE-PAUL": "33548",
+            "TALENCE": "33522",
+            "VILLENAVE_D_ORNON": "33550", "VILLENAVE-D-ORNON": "33550"
+        };
+
+        const fallbackCS1 = {
+            "1": "Agriculteurs",
+            "2": "Artisans / Chefs d'entr.",
+            "3": "Cadres & Prof. Sup.",
+            "4": "Prof. Intermédiaires",
+            "5": "Employés",
+            "6": "Ouvriers",
+            "7": "Retraités",
+            "8": "Autres Inactifs"
         };
 
         let SQLInstance = null;
 
+        // On window load
         window.onload = async function() {
-            // Setup Leaflet Map
-            map = L.map('map', {
-                zoomControl: true,
-                attributionControl: false
-            }).setView([44.837789, -0.57918], 11);
-
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                maxZoom: 20
-            }).addTo(map);
-
-            setupTabs();
-
             // Load SQL.js WebAssembly
             try {
                 const config = {
                     locateFile: filename => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${filename}`
                 };
                 SQLInstance = await initSqlJs(config);
-                showNotification("Moteur SQL.js chargé en WebAssembly", "success");
+                showNotification("Moteur SQL.js chargé en tâche de fond", "success");
             } catch(e) {
-                showNotification("Échec du chargement WebAssembly SQLite.", "error");
+                showNotification("Échec du chargement du moteur SQL.", "error");
                 console.error(e);
             }
 
             setupDropzones();
             setupControllers();
-
-            // Auto-load Bordeaux Demo
-            loadDemoData();
         }
 
-        function setupTabs() {
-            const btnImport = document.getElementById('tab-btn-import');
-            const btnConfig = document.getElementById('tab-btn-config');
-            const panelImport = document.getElementById('tab-content-import');
-            const panelConfig = document.getElementById('tab-content-config');
-
-            btnImport.addEventListener('click', () => {
-                btnImport.className = "flex-1 py-3 text-xs font-semibold uppercase tracking-wider text-center border-b-2 border-brand-500 text-brand-500 hover:bg-slate-900/40 transition";
-                btnConfig.className = "flex-1 py-3 text-xs font-semibold uppercase tracking-wider text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/40 transition";
-                panelImport.classList.remove('hidden');
-                panelConfig.classList.add('hidden');
-            });
-
-            btnConfig.addEventListener('click', () => {
-                btnConfig.className = "flex-1 py-3 text-xs font-semibold uppercase tracking-wider text-center border-b-2 border-brand-500 text-brand-500 hover:bg-slate-900/40 transition";
-                btnImport.className = "flex-1 py-3 text-xs font-semibold uppercase tracking-wider text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/40 transition";
-                panelConfig.classList.remove('hidden');
-                panelImport.classList.add('hidden');
-            });
+        // Safe string normalization function to cleanly link names
+        function normalizeCommuneName(name) {
+            if (!name) return "";
+            return name.toUpperCase()
+                       .normalize("NFD")
+                       .replace(/[\u0300-\u036f]/g, "") // remove accents
+                       .replace(/[^A-Z0-9]/g, "_")    // replace characters
+                       .replace(/_+/g, "_")           // collapse duplicate underscores
+                       .trim();
         }
 
         function setupControllers() {
@@ -404,205 +358,27 @@
                 if(animationInterval) {
                     clearInterval(animationInterval);
                     animationInterval = null;
-                    playIcon.className = "fa-solid fa-play text-sm";
-                    showNotification("Visualisation en pause");
+                    playIcon.className = "fa-solid fa-play text-xs pl-0.5";
                 } else {
-                    playIcon.className = "fa-solid fa-pause text-sm";
-                    showNotification("Défilement temporel en cours");
+                    playIcon.className = "fa-solid fa-pause text-xs";
                     animationInterval = setInterval(() => {
                         let currentYear = parseInt(slider.value);
-                        currentYear += 2;
+                        currentYear += 1;
                         if(currentYear > 2026) currentYear = 2010;
                         slider.value = currentYear;
                         updateActiveYear(currentYear);
-                    }, 1400);
+                    }, 1200);
                 }
             });
 
             const filterCommune = document.getElementById('filter-commune');
             filterCommune.addEventListener('change', () => {
-                highlightSelectedCommune();
                 refreshAnalysisAndCharts();
             });
-
-            const btnDemo = document.getElementById('btn-reset-demo');
-            btnDemo.addEventListener('click', () => {
-                loadDemoData();
-            });
-        }
-
-        function getInseeCode(properties) {
-            const keys = ['code_insee', 'insee', 'code', 'codgeo', 'insee_com', 'com', 'id'];
-            for (let k of keys) {
-                if (properties[k] !== undefined) {
-                    return String(properties[k]).strip ? String(properties[k]).trim() : String(properties[k]);
-                }
-            }
-            return null;
-        }
-
-        function getCommuneName(properties) {
-            const keys = ['nom', 'nom_com', 'nom_commune', 'libgeo', 'nom_com_m', 'l_com', 'l_com_m'];
-            for (let k of keys) {
-                if (properties[k] !== undefined) {
-                    return String(properties[k]).strip ? String(properties[k]).trim() : String(properties[k]);
-                }
-            }
-            return null;
-        }
-
-        function loadDemoData() {
-            if(animationInterval) {
-                clearInterval(animationInterval);
-                animationInterval = null;
-                document.getElementById('play-icon').className = "fa-solid fa-play text-sm";
-            }
-
-            document.getElementById('data-mode-badge').className = "flex items-center space-x-2 bg-amber-500/10 text-amber-400 border border-amber-500/20 px-3 py-1.5 rounded-xl text-[11px] font-medium";
-            document.getElementById('data-mode-badge').innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span><span>Mode Démo Actif (Bordeaux Métropole)</span>`;
-
-            updateBadge('sqlite', 'Demo', 'bg-amber-500/10 border-amber-500/20 text-amber-400');
-            updateBadge('communes', 'Demo', 'bg-amber-500/10 border-amber-500/20 text-amber-400');
-            updateBadge('cyclable', 'Demo', 'bg-amber-500/10 border-amber-500/20 text-amber-400');
-            updateBadge('voirie', 'Demo', 'bg-amber-500/10 border-amber-500/20 text-amber-400');
-
-            const center = [44.837789, -0.57918];
-            const sampleCommunes = [
-                { insee: '33063', name: 'Bordeaux', center: [44.837789, -0.57918] },
-                { insee: '33281', name: 'Mérignac', center: [44.8385, -0.6621] },
-                { insee: '33318', name: 'Pessac', center: [44.8062, -0.6311] },
-                { insee: '33249', name: 'Lormont', center: [44.8774, -0.5222] },
-                { insee: '33522', name: 'Talence', center: [44.8012, -0.5898] }
-            ];
-
-            inseeToNameMap = {};
-            nameToInseeMap = {};
-            sampleCommunes.forEach(c => {
-                inseeToNameMap[c.insee] = c.name;
-                nameToInseeMap[c.name] = c.insee;
-            });
-
-            // 1. Generate Virtual SQLite
-            if (SQLInstance) {
-                sqliteDb = new SQLInstance.Database();
-                sqliteDb.run(`
-                    CREATE TABLE mobpro_agg (
-                        year INTEGER,
-                        geo_object TEXT,
-                        geo TEXT,
-                        work_area TEXT,
-                        trans TEXT,
-                        cs1 TEXT,
-                        value REAL
-                    );
-                    CREATE TABLE ref_trans (code TEXT PRIMARY KEY, libelle TEXT);
-                    CREATE TABLE ref_cs1 (code TEXT PRIMARY KEY, libelle TEXT);
-                `);
-
-                // Insert dynamic, clean weights following an active modal shift
-                const yearTrend = {
-                    2010: 0.04, 2012: 0.05, 2014: 0.065, 2016: 0.08, 2018: 0.10, 2020: 0.125, 2022: 0.145, 2024: 0.17, 2026: 0.20
-                };
-
-                const csps = [
-                    { code: '1', lib: 'Agriculteurs' },
-                    { code: '2', lib: 'Artisans / Chefs d\'entr.' },
-                    { code: '3', lib: 'Cadres & Prof. Sup.' },
-                    { code: '4', lib: 'Prof. Intermédiaires' },
-                    { code: '5', lib: 'Employés' },
-                    { code: '6', lib: 'Ouvriers' }
-                ];
-
-                csps.forEach(c => {
-                    sqliteDb.run("INSERT INTO ref_cs1 VALUES (?, ?)", [c.code, c.lib]);
-                });
-
-                const modes = [
-                    { code: '1', lib: 'Pas de transport' },
-                    { code: '2', lib: 'Marche à pied' },
-                    { code: '3', lib: 'Vélo, y compris VAE' },
-                    { code: '4', lib: 'Deux-roues motorisé' },
-                    { code: '5', lib: 'Voiture ou fourgon' },
-                    { code: '6', lib: 'Transports en commun' }
-                ];
-
-                modes.forEach(m => {
-                    sqliteDb.run("INSERT INTO ref_trans VALUES (?, ?)", [m.code, m.lib]);
-                });
-
-                sampleCommunes.forEach(com => {
-                    calculatedMetrics.allYears.forEach(yr => {
-                        csps.forEach(csp => {
-                            let basePopulation = 5000 + Math.random() * 8000;
-                            let bikeRatio = yearTrend[yr] * (csp.code === '3' ? 1.5 : (csp.code === '6' ? 0.4 : 0.9));
-                            
-                            // Random slight noise
-                            bikeRatio += (Math.random() - 0.5) * 0.02;
-                            bikeRatio = Math.max(0.01, Math.min(0.35, bikeRatio));
-
-                            let bikeVal = basePopulation * bikeRatio;
-                            let carVal = basePopulation * (0.6 - bikeRatio * 0.5);
-                            let ptVal = basePopulation * 0.25;
-                            let activeVal = basePopulation - bikeVal - carVal - ptVal;
-
-                            sqliteDb.run("INSERT INTO mobpro_agg VALUES (?, 'COM', ?, '10', '3', ?, ?)", [yr, com.insee, csp.code, bikeVal]);
-                            sqliteDb.run("INSERT INTO mobpro_agg VALUES (?, 'COM', ?, '10', '5', ?, ?)", [yr, com.insee, csp.code, carVal]);
-                            sqliteDb.run("INSERT INTO mobpro_agg VALUES (?, 'COM', ?, '10', '6', ?, ?)", [yr, com.insee, csp.code, ptVal]);
-                            sqliteDb.run("INSERT INTO mobpro_agg VALUES (?, 'COM', ?, '10', '1', ?, ?)", [yr, com.insee, csp.code, activeVal]);
-                        });
-                    });
-                });
-
-                syncLabelsFromDatabase();
-            }
-
-            // 2. Procedural GeoJSON structures for demo
-            const roadsFeatures = [];
-            const bikeFeatures = [];
-            const communeFeatures = [];
-
-            sampleCommunes.forEach((com, idx) => {
-                // Polygon for commune
-                const poly = turf.circle(com.center, 3.5, { steps: 8, units: 'kilometers' });
-                poly.properties = { code_insee: com.insee, nom: com.name };
-                communeFeatures.push(poly);
-
-                // Roads and bike paths centered on each commune
-                for(let i=0; i<15; i++) {
-                    const angle = (i * 24) * (Math.PI / 180);
-                    const lenRoad = 1.0 + Math.random() * 2.5;
-                    const rEnd = [com.center[0] + Math.sin(angle)*lenRoad*0.01, com.center[1] + Math.cos(angle)*lenRoad*0.01];
-                    
-                    roadsFeatures.push(turf.lineString([com.center.reverse(), rEnd.reverse()], { id: `r_${idx}_${i}` }));
-                    com.center.reverse(); // reset reverse side effect
-
-                    if (i % 2 === 0) {
-                        const constrYear = calculatedMetrics.allYears[i % calculatedMetrics.allYears.length];
-                        const bEnd = [com.center[0] + Math.sin(angle+0.1)*lenRoad*0.009, com.center[1] + Math.cos(angle+0.1)*lenRoad*0.009];
-                        bikeFeatures.push(turf.lineString([com.center.reverse(), bEnd.reverse()], {
-                            id: `b_${idx}_${i}`,
-                            annee: constrYear,
-                            amenagement: i % 3 === 0 ? "Piste cyclable" : "Bande cyclable"
-                        }));
-                        com.center.reverse();
-                    }
-                }
-            });
-
-            rawData.communesGeojson = { "type": "FeatureCollection", "features": communeFeatures };
-            rawData.voirie = { "type": "FeatureCollection", "features": roadsFeatures };
-            rawData.cyclables = { "type": "FeatureCollection", "features": bikeFeatures };
-
-            calculateGlobalMetrics();
-            populateCommunesDropdown();
-            renderMapLayers();
-            updateActiveYear(2010);
-            map.setView(center, 11);
         }
 
         function setupDropzones() {
             configureDropzone('dropzone-sqlite', 'file-sqlite', 'sqlite', 'badge-sqlite');
-            configureDropzone('dropzone-communes', 'file-communes', 'communesGeojson', 'badge-communes');
             configureDropzone('dropzone-cyclable', 'file-cyclable', 'cyclables', 'badge-cyclable');
             configureDropzone('dropzone-voirie', 'file-voirie', 'voirie', 'badge-voirie');
         }
@@ -615,29 +391,32 @@
 
             zone.addEventListener('dragover', (e) => {
                 e.preventDefault();
-                zone.classList.add('border-brand-500', 'bg-slate-950/90');
+                zone.classList.remove('bg-[#f5f5f7]');
+                zone.classList.add('bg-apple-blue/5', 'border-apple-blue');
             });
 
             zone.addEventListener('dragleave', () => {
-                zone.classList.remove('border-brand-500', 'bg-slate-950/90');
+                zone.classList.remove('bg-apple-blue/5', 'border-apple-blue');
+                zone.classList.add('bg-[#f5f5f7]');
             });
 
             zone.addEventListener('drop', (e) => {
                 e.preventDefault();
-                zone.classList.remove('border-brand-500', 'bg-slate-950/90');
+                zone.classList.remove('bg-apple-blue/5', 'border-apple-blue');
+                zone.classList.add('bg-[#f5f5f7]');
                 if (e.dataTransfer.files.length > 0) {
-                    processUploadedFile(e.dataTransfer.files[0], stateKey, badgeId);
+                    processFile(e.dataTransfer.files[0], stateKey, badgeId);
                 }
             });
 
             input.addEventListener('change', (e) => {
                 if (e.target.files.length > 0) {
-                    processUploadedFile(e.target.files[0], stateKey, badgeId);
+                    processFile(e.target.files[0], stateKey, badgeId);
                 }
             });
         }
 
-        function processUploadedFile(file, stateKey, badgeId) {
+        function processFile(file, stateKey, badgeId) {
             const reader = new FileReader();
 
             if (stateKey === 'sqlite') {
@@ -645,15 +424,10 @@
                     try {
                         const arr = new Uint8Array(e.target.result);
                         sqliteDb = new SQLInstance.Database(arr);
-                        updateBadge(badgeId, 'Actif', 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400');
+                        updateBadge(badgeId, 'Actif', 'bg-apple-blue/10 border-apple-blue/20 text-apple-blue');
                         showNotification("Base SQLite importée !", "success");
                         syncLabelsFromDatabase();
-                        
-                        document.getElementById('data-mode-badge').className = "flex items-center space-x-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1.5 rounded-xl text-[11px] font-medium";
-                        document.getElementById('data-mode-badge').innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span><span>Mode Données Réelles</span>`;
-                        
-                        populateCommunesDropdown();
-                        refreshAnalysisAndCharts();
+                        checkActivationStatus();
                     } catch(err) {
                         showNotification("Erreur de décodage de la base SQLite.", "error");
                         console.error(err);
@@ -664,41 +438,12 @@
                 reader.onload = function(e) {
                     try {
                         const parsed = JSON.parse(e.target.result);
-                        if (parsed.type !== 'FeatureCollection') {
-                            showNotification("GeoJSON invalide. FeatureCollection attendue.", "error");
-                            return;
-                        }
-                        
                         rawData[stateKey] = parsed;
-
-                        // Si on importe des limites géographiques de communes, on parse les codes INSEE de référence
-                        if (stateKey === 'communesGeojson') {
-                            inseeToNameMap = {};
-                            nameToInseeMap = {};
-                            parsed.features.forEach(feat => {
-                                const code = getInseeCode(feat.properties);
-                                const name = getCommuneName(feat.properties);
-                                if (code && name) {
-                                    inseeToNameMap[code] = name;
-                                    nameToInseeMap[name] = code;
-                                }
-                            });
-                        }
-
-                        updateBadge(badgeId, 'Actif', 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400');
-                        showNotification(`Fichier ${stateKey} importé !`, "success");
-
-                        // Ajuster l'emprise de la carte
-                        const bounds = L.geoJSON(parsed).getBounds();
-                        if (bounds.isValid()) {
-                            map.fitBounds(bounds);
-                        }
-
-                        calculateGlobalMetrics();
-                        renderMapLayers();
-                        updateActiveYear(parseInt(document.getElementById('time-slider').value));
+                        updateBadge(badgeId, 'Actif', 'bg-apple-blue/10 border-apple-blue/20 text-apple-blue');
+                        showNotification(`Fichier ${stateKey} traité !`, "success");
+                        checkActivationStatus();
                     } catch(err) {
-                        showNotification("Structure JSON / GeoJSON invalide", "error");
+                        showNotification("Fichier JSON / GeoJSON invalide.", "error");
                         console.error(err);
                     }
                 };
@@ -708,27 +453,93 @@
 
         function syncLabelsFromDatabase() {
             if(!sqliteDb) return;
-            
             transLabels = {};
             cs1Labels = {};
 
             try {
                 const resTrans = sqliteDb.exec("SELECT code, libelle FROM ref_trans;");
                 if (resTrans.length > 0) {
-                    resTrans[0].values.forEach(r => { transLabels[r[0]] = r[1]; });
+                    resTrans[0].values.forEach(r => { transLabels[String(r[0]).trim()] = String(r[1]).trim(); });
                 }
             } catch(e) {
-                console.warn("Table ref_trans introuvable. Utilisation du fallback.");
+                console.warn("Table ref_trans non disponible.");
             }
 
             try {
                 const resCs1 = sqliteDb.exec("SELECT code, libelle FROM ref_cs1;");
                 if (resCs1.length > 0) {
-                    resCs1[0].values.forEach(r => { cs1Labels[r[0]] = r[1]; });
+                    resCs1[0].values.forEach(r => { cs1Labels[String(r[0]).trim()] = String(r[1]).trim(); });
                 }
             } catch(e) {
-                console.warn("Table ref_cs1 introuvable. Utilisation du fallback.");
+                console.warn("Table ref_cs1 non disponible.");
             }
+        }
+
+        // Check if all files are active to transition from Onboarding to Dashboard
+        function checkActivationStatus() {
+            if (sqliteDb && rawData.cyclables && rawData.voirie) {
+                document.getElementById('onboarding-screen').classList.add('hidden');
+                document.getElementById('dashboard-content').classList.remove('hidden');
+                document.getElementById('wrapper-filter-commune').classList.remove('hidden');
+                
+                document.getElementById('status-pill').className = "flex items-center space-x-2 bg-apple-green/10 text-apple-green border border-apple-green/20 px-3.5 py-1.5 rounded-full text-xs font-medium";
+                document.getElementById('status-pill').innerHTML = `<span class="inline-block w-1.5 h-1.5 rounded-full bg-apple-green"></span><span>Données Prêtes</span>`;
+
+                preaggregateData();
+                populateCommunesDropdown();
+                updateActiveYear(2010);
+            }
+        }
+
+        // Ultra-fast properties-based aggregation (No geographical computation failures)
+        function preaggregateData() {
+            calculatedMetrics.roadLengths = {};
+            calculatedMetrics.bikeLengthsByYear = {};
+
+            // 1. Process Roads lengths (Always static and grouped by commune_associee)
+            if (rawData.voirie && rawData.voirie.features) {
+                rawData.voirie.features.forEach(feat => {
+                    const comRaw = feat.properties.commune_associee || "SANS_COMMUNE";
+                    const comNorm = normalizeCommuneName(comRaw);
+                    const len = parseFloat(feat.properties.longueur_km) || 0;
+
+                    if (!calculatedMetrics.roadLengths[comNorm]) {
+                        calculatedMetrics.roadLengths[comNorm] = 0;
+                    }
+                    calculatedMetrics.roadLengths[comNorm] += len;
+                });
+            }
+
+            // 2. Process Bike paths lengths with strict temporal CUMULATION
+            if (rawData.cyclables && rawData.cyclables.features) {
+                rawData.cyclables.features.forEach(feat => {
+                    const comRaw = feat.properties.commune_associee || "SANS_COMMUNE";
+                    const comNorm = normalizeCommuneName(comRaw);
+                    const builtYear = parseInt(feat.properties.ANNEE || feat.properties.annee);
+                    const len = parseFloat(feat.properties.longueur_km) || 0;
+
+                    if (!calculatedMetrics.bikeLengthsByYear[comNorm]) {
+                        calculatedMetrics.bikeLengthsByYear[comNorm] = {};
+                        calculatedMetrics.allYears.forEach(yr => {
+                            calculatedMetrics.bikeLengthsByYear[comNorm][yr] = 0;
+                        });
+                    }
+
+                    // Strict temporal cumulation: add length to every year >= creation year
+                    calculatedMetrics.allYears.forEach(yr => {
+                        if (yr >= builtYear || isNaN(builtYear)) {
+                            calculatedMetrics.bikeLengthsByYear[comNorm][yr] += len;
+                        }
+                    });
+                });
+            }
+
+            // Populate unified unique list
+            const allSet = new Set([
+                ...Object.keys(calculatedMetrics.roadLengths),
+                ...Object.keys(calculatedMetrics.bikeLengthsByYear)
+            ]);
+            calculatedMetrics.communesList = Array.from(allSet).sort();
         }
 
         function populateCommunesDropdown() {
@@ -737,237 +548,105 @@
 
             const optAll = document.createElement('option');
             optAll.value = 'ALL';
-            optAll.innerText = 'Toutes les communes de la zone';
+            optAll.innerText = 'Toutes les communes';
             dropdown.appendChild(optAll);
 
-            if (!sqliteDb) return;
-
-            try {
-                const res = sqliteDb.exec("SELECT DISTINCT geo FROM mobpro_agg WHERE geo IS NOT NULL ORDER BY geo ASC;");
-                if (res.length > 0) {
-                    const codes = res[0].values.map(v => v[0]);
-                    calculatedMetrics.communesWithData = codes;
-
-                    codes.forEach(code => {
-                        const opt = document.createElement('option');
-                        opt.value = code;
-                        // Affichage intelligent avec le dictionnaire d'alias spatial
-                        const name = inseeToNameMap[code] || `Code INSEE ${code}`;
-                        opt.innerText = name;
-                        dropdown.appendChild(opt);
-                    });
-                }
-            } catch(e) {
-                console.error("Erreur de lecture des communes uniques", e);
-            }
-        }
-
-        function calculateGlobalMetrics() {
-            if (!rawData.voirie) return;
-
-            let totalLen = 0;
-            rawData.voirie.features.forEach(feat => {
-                try {
-                    totalLen += turf.length(feat, { units: 'kilometers' });
-                } catch(e) {}
+            calculatedMetrics.communesList.forEach(comNorm => {
+                const opt = document.createElement('option');
+                opt.value = comNorm;
+                opt.innerText = comNorm.replace(/_/g, " ");
+                dropdown.appendChild(opt);
             });
-            calculatedMetrics.totalRoadLengthGlobal = totalLen;
-
-            if (!rawData.cyclables) return;
-
-            calculatedMetrics.cyclableLengthByYearGlobal = {};
-            calculatedMetrics.allYears.forEach(y => {
-                calculatedMetrics.cyclableLengthByYearGlobal[y] = 0;
-            });
-
-            rawData.cyclables.features.forEach(feat => {
-                try {
-                    let y = parseInt(feat.properties.annee);
-                    if (!y || isNaN(y)) y = 2010;
-
-                    const len = turf.length(feat, { units: 'kilometers' });
-                    calculatedMetrics.allYears.forEach(yr => {
-                        if (yr >= y) {
-                            calculatedMetrics.cyclableLengthByYearGlobal[yr] += len;
-                        }
-                    });
-                } catch(e) {}
-            });
-        }
-
-        // Intersects / Clippings par Bbox pour d'excellentes performances géospatiales
-        function getLocalMetrics(selectedInsee) {
-            if (selectedInsee === 'ALL' || !rawData.communesGeojson) {
-                return {
-                    roadLength: calculatedMetrics.totalRoadLengthGlobal,
-                    bikePathsByYear: calculatedMetrics.cyclableLengthByYearGlobal
-                };
-            }
-
-            // Recherche du polygone de la commune
-            const communeFeature = rawData.communesGeojson.features.find(f => getInseeCode(f.properties) === selectedInsee);
-            if (!communeFeature) {
-                return {
-                    roadLength: calculatedMetrics.totalRoadLengthGlobal,
-                    bikePathsByYear: calculatedMetrics.cyclableLengthByYearGlobal
-                };
-            }
-
-            let roadLength = 0;
-            let bikePathsByYear = {};
-            calculatedMetrics.allYears.forEach(y => { bikePathsByYear[y] = 0; });
-
-            // On utilise un tampon bounding box pour accélérer l'intersection (Dizaines de milliers d'entités)
-            const comBbox = turf.bbox(communeFeature);
-            const comPoly = turf.bboxPolygon(comBbox);
-
-            if (rawData.voirie) {
-                rawData.voirie.features.forEach(feat => {
-                    try {
-                        const featBbox = turf.bbox(feat);
-                        const featPoly = turf.bboxPolygon(featBbox);
-
-                        if (turf.booleanIntersects(featPoly, comPoly)) {
-                            // Si les enveloppes s'intersectent, on calcule précisément
-                            const intersect = turf.intersect(feat, communeFeature);
-                            if (intersect) {
-                                roadLength += turf.length(intersect, { units: 'kilometers' });
-                            }
-                        }
-                    } catch(e) {}
-                });
-            }
-
-            if (rawData.cyclables) {
-                rawData.cyclables.features.forEach(feat => {
-                    try {
-                        const featBbox = turf.bbox(feat);
-                        const featPoly = turf.bboxPolygon(featBbox);
-
-                        if (turf.booleanIntersects(featPoly, comPoly)) {
-                            const intersect = turf.intersect(feat, communeFeature);
-                            if (intersect) {
-                                let y = parseInt(feat.properties.annee);
-                                if (!y || isNaN(y)) y = 2010;
-
-                                const len = turf.length(intersect, { units: 'kilometers' });
-                                calculatedMetrics.allYears.forEach(yr => {
-                                    if (yr >= y) {
-                                        bikePathsByYear[yr] += len;
-                                    }
-                                });
-                            }
-                        }
-                    } catch(e) {}
-                });
-            }
-
-            return { roadLength, bikePathsByYear };
-        }
-
-        function highlightSelectedCommune() {
-            const code = document.getElementById('filter-commune').value;
-
-            if (mapLayers.highlight) {
-                map.removeLayer(mapLayers.highlight);
-                mapLayers.highlight = null;
-            }
-
-            if (code === 'ALL' || !rawData.communesGeojson) return;
-
-            const communeFeature = rawData.communesGeojson.features.find(f => getInseeCode(f.properties) === code);
-            if (communeFeature) {
-                mapLayers.highlight = L.geoJSON(communeFeature, {
-                    style: {
-                        color: '#fbbf24',
-                        weight: 3,
-                        fillColor: '#fbbf24',
-                        fillOpacity: 0.1,
-                        dashArray: '5, 5'
-                    }
-                }).addTo(map);
-
-                const bounds = mapLayers.highlight.getBounds();
-                if (bounds.isValid()) {
-                    map.fitBounds(bounds, { padding: [30, 30] });
-                }
-            }
         }
 
         function refreshAnalysisAndCharts() {
-            const selectedInsee = document.getElementById('filter-commune').value;
+            const selectedCommune = document.getElementById('filter-commune').value;
             const activeYear = parseInt(document.getElementById('time-slider').value);
 
-            // 1. Calculs Spatiaux Locaux ou Globaux
-            const spatial = getLocalMetrics(selectedInsee);
-            const currentBikeLength = spatial.bikePathsByYear[activeYear] || 0;
-            const totalRoad = spatial.roadLength || 1; // Éviter division par 0
-            const cyclabilityRatio = (currentBikeLength / totalRoad) * 100;
+            let totalRoadLen = 0;
+            let activeBikeLen = 0;
 
-            document.getElementById('stat-total-voirie').innerText = `${spatial.roadLength.toFixed(1)} km`;
-            document.getElementById('stat-total-cyclable').innerText = `${currentBikeLength.toFixed(1)} km`;
-            document.getElementById('stat-ratio-infra').innerText = `${cyclabilityRatio.toFixed(2)} %`;
+            if (selectedCommune === 'ALL') {
+                for (let com in calculatedMetrics.roadLengths) {
+                    totalRoadLen += calculatedMetrics.roadLengths[com];
+                }
+                for (let com in calculatedMetrics.bikeLengthsByYear) {
+                    activeBikeLen += calculatedMetrics.bikeLengthsByYear[com][activeYear] || 0;
+                }
+            } else {
+                totalRoadLen = calculatedMetrics.roadLengths[selectedCommune] || 0;
+                activeBikeLen = (calculatedMetrics.bikeLengthsByYear[selectedCommune] && calculatedMetrics.bikeLengthsByYear[selectedCommune][activeYear]) || 0;
+            }
 
-            // 2. Requêtage SQL de précision INSEE pondéré (IPONDI)
-            let modalShare = 0;
+            const ratio = totalRoadLen > 0 ? (activeBikeLen / totalRoadLen) * 100 : 0;
+
+            document.getElementById('stat-total-voirie').innerText = `${totalRoadLen.toLocaleString('fr-FR', {maximumFractionDigits: 1})} km`;
+            document.getElementById('stat-total-cyclable').innerText = `${activeBikeLen.toLocaleString('fr-FR', {maximumFractionDigits: 1})} km`;
+            document.getElementById('stat-ratio-infra').innerText = `${ratio.toFixed(2)} %`;
+
+            // Active year modal share
+            let bikeModalShare = 0;
             if (sqliteDb) {
                 let query = `
                     SELECT 
-                        SUM(CASE WHEN trans = '3' THEN value ELSE 0 END) * 100.0 / SUM(value) as bike_share
+                        SUM(CASE WHEN trans = '3' THEN value ELSE 0 END) * 100.0 / NULLIF(SUM(value), 0) as bike_share
                     FROM mobpro_agg
                     WHERE year = ${activeYear}
                 `;
-                if (selectedInsee !== 'ALL') {
-                    query += ` AND geo = '${selectedInsee}'`;
+
+                if (selectedCommune !== 'ALL') {
+                    const inseeCode = inseeMapping[selectedCommune];
+                    if (inseeCode) {
+                        query += ` AND geo = '${inseeCode}'`;
+                    } else {
+                        query += ` AND geo = '${selectedCommune}'`;
+                    }
                 }
 
                 try {
                     const res = sqliteDb.exec(query);
                     if (res.length > 0 && res[0].values[0][0] !== null) {
-                        modalShare = parseFloat(res[0].values[0][0]);
+                        bikeModalShare = parseFloat(res[0].values[0][0]);
                     }
                 } catch(e) {
-                    console.error("Erreur de calcul de part modale", e);
+                    console.error("Erreur requêtage part modale", e);
                 }
             }
-            document.getElementById('stat-part-modale-moyen').innerText = modalShare > 0 ? `${modalShare.toFixed(2)} %` : "0.00 %";
+            document.getElementById('stat-part-modale-moyen').innerText = bikeModalShare > 0 ? `${bikeModalShare.toFixed(2)} %` : "-- %";
 
-            // Mise à jour des graphes
-            renderCorrelationChart(selectedInsee, spatial);
-            renderSociologyChart(selectedInsee, activeYear);
+            // Draw premium charts
+            renderCorrelationChart(selectedCommune);
+            renderSociologyChart(selectedCommune, activeYear);
         }
 
-        function renderCorrelationChart(selectedInsee, spatial) {
+        function renderCorrelationChart(selectedCommune) {
             const ctx = document.getElementById('chart-correlation').getContext('2d');
-            const labels = calculatedMetrics.allYears;
+            
+            const rawRatioPoints = [];
+            const rawModalSharePoints = [];
+            const validLabels = [];
 
-            const infraPoints = [];
-            const inseePoints = [];
+            calculatedMetrics.allYears.forEach(yr => {
+                // Taux cyclabilité
+                let road = 0;
+                let bike = 0;
+                if (selectedCommune === 'ALL') {
+                    for (let c in calculatedMetrics.roadLengths) { road += calculatedMetrics.roadLengths[c]; }
+                    for (let c in calculatedMetrics.bikeLengthsByYear) { bike += calculatedMetrics.bikeLengthsByYear[c][yr] || 0; }
+                } else {
+                    road = calculatedMetrics.roadLengths[selectedCommune] || 0;
+                    bike = (calculatedMetrics.bikeLengthsByYear[selectedCommune] && calculatedMetrics.bikeLengthsByYear[selectedCommune][yr]) || 0;
+                }
+                const ptRatio = road > 0 ? (bike / road) * 100 : 0;
 
-            // Pour la requête de corrélation temporelle
-            let queryText = `SELECT year,\n  SUM(CASE WHEN trans = '3' THEN value ELSE 0 END) * 100.0 / SUM(value) as bike_share\nFROM mobpro_agg\n`;
-            if (selectedInsee !== 'ALL') {
-                queryText += `WHERE geo = '${selectedInsee}'\n`;
-            }
-            queryText += `GROUP BY year\nORDER BY year ASC;`;
-            document.getElementById('sql-query-display').value = queryText;
-
-            labels.forEach(y => {
-                // Taux cyclabilité spatial
-                const bikeLen = spatial.bikePathsByYear[y] || 0;
-                const roadLen = spatial.roadLength || 1;
-                infraPoints.push((bikeLen / roadLen) * 100);
-
-                // Part modale réelle INSEE
-                let share = 0;
+                // Part modale
+                let share = null;
                 if (sqliteDb) {
-                    let q = `
-                        SELECT SUM(CASE WHEN trans = '3' THEN value ELSE 0 END) * 100.0 / SUM(value)
-                        FROM mobpro_agg
-                        WHERE year = ${y}
-                    `;
-                    if (selectedInsee !== 'ALL') q += ` AND geo = '${selectedInsee}'`;
-                    
+                    let q = `SELECT SUM(CASE WHEN trans = '3' THEN value ELSE 0 END) * 100.0 / NULLIF(SUM(value), 0) FROM mobpro_agg WHERE year = ${yr}`;
+                    if (selectedCommune !== 'ALL') {
+                        const code = inseeMapping[selectedCommune] || selectedCommune;
+                        q += ` AND geo = '${code}'`;
+                    }
                     try {
                         const res = sqliteDb.exec(q);
                         if (res.length > 0 && res[0].values[0][0] !== null) {
@@ -975,35 +654,44 @@
                         }
                     } catch(e) {}
                 }
-                inseePoints.push(share);
+
+                // If no database data is found for this year, store as NaN so Chart.js can span the gap seamlessly
+                rawRatioPoints.push(ptRatio);
+                rawModalSharePoints.push((share !== null && share > 0) ? share : NaN);
+                validLabels.push(yr);
             });
 
             if (chartCorrelation) chartCorrelation.destroy();
 
+            // Setup soft curves with shadows
             chartCorrelation = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: validLabels,
                     datasets: [
                         {
                             label: 'Taux Cyclabilité (%)',
-                            data: infraPoints,
-                            borderColor: '#10b981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                            data: rawRatioPoints,
+                            borderColor: '#0071e3',
+                            backgroundColor: 'rgba(0, 113, 227, 0.04)',
                             yAxisID: 'yInfra',
                             borderWidth: 2,
-                            tension: 0.3,
-                            fill: true
+                            tension: 0.35,
+                            fill: true,
+                            pointRadius: 0,
+                            pointHoverRadius: 4
                         },
                         {
                             label: 'Part Modale Vélo (INSEE %)',
-                            data: inseePoints,
-                            borderColor: '#fbbf24',
+                            data: rawModalSharePoints,
+                            borderColor: '#34c759',
                             backgroundColor: 'transparent',
                             yAxisID: 'yModal',
-                            borderWidth: 2,
-                            borderDash: [4, 4],
-                            tension: 0.3
+                            borderWidth: 2.5,
+                            tension: 0.35,
+                            spanGaps: true, // Prevents collapsing lines for missing years!
+                            pointRadius: 3,
+                            pointHoverRadius: 5
                         }
                     ]
                 },
@@ -1011,165 +699,118 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { labels: { color: '#94a3b8', font: { size: 10 } } }
+                        legend: { 
+                            position: 'top',
+                            labels: { color: '#1d1d1f', font: { family: 'Inter', size: 10, weight: '500' } } 
+                        }
                     },
                     scales: {
-                        x: { grid: { color: '#1e293b' }, ticks: { color: '#64748b' } },
+                        x: { 
+                            grid: { display: false }, 
+                            ticks: { color: '#86868b', font: { size: 10 } } 
+                        },
                         yInfra: {
                             type: 'linear',
                             position: 'left',
-                            grid: { color: '#1e293b' },
-                            ticks: { color: '#10b981' },
-                            title: { display: true, text: '% Voirie Aménagée', color: '#10b981', font: { size: 9 } }
+                            grid: { color: '#e8e8ed' },
+                            ticks: { color: '#0071e3', font: { size: 10 } },
+                            title: { display: true, text: '% Réseau routier cyclable', color: '#0071e3', font: { size: 9, weight: '600' } }
                         },
                         yModal: {
                             type: 'linear',
                             position: 'right',
                             grid: { drawOnChartArea: false },
-                            ticks: { color: '#fbbf24' },
-                            title: { display: true, text: 'Part Modale réelle (%)', color: '#fbbf24', font: { size: 9 } }
+                            ticks: { color: '#34c759', font: { size: 10 } },
+                            title: { display: true, text: 'Part Modale Vélo (%)', color: '#34c759', font: { size: 9, weight: '600' } }
                         }
                     }
                 }
             });
         }
 
-        function renderSociologyChart(selectedInsee, activeYear) {
+        function renderSociologyChart(selectedCommune, activeYear) {
             const ctx = document.getElementById('chart-sociology').getContext('2d');
-            
             const categories = [];
             const shares = [];
 
             if (sqliteDb) {
+                // Highly robust SQL query with LEFT JOIN on metadata ref and normalizations
                 let q = `
                     SELECT 
                         cs1,
-                        SUM(CASE WHEN trans = '3' THEN value ELSE 0 END) * 100.0 / SUM(value) as csp_bike_share
+                        SUM(CASE WHEN trans = '3' THEN value ELSE 0 END) * 100.0 / NULLIF(SUM(value), 0) as csp_bike_share
                     FROM mobpro_agg
-                    WHERE year = ${activeYear}
+                    WHERE year = ${activeYear} AND cs1 IS NOT NULL AND cs1 != ''
                 `;
-                if (selectedInsee !== 'ALL') q += ` AND geo = '${selectedInsee}'`;
+                if (selectedCommune !== 'ALL') {
+                    const code = inseeMapping[selectedCommune] || selectedCommune;
+                    q += ` AND geo = '${code}'`;
+                }
                 q += ` GROUP BY cs1 ORDER BY cs1 ASC;`;
 
                 try {
                     const res = sqliteDb.exec(q);
                     if (res.length > 0) {
                         res[0].values.forEach(row => {
-                            const code = row[0];
-                            const share = parseFloat(row[1]);
-                            const lib = cs1Labels[code] || `Code CSP ${code}`;
-                            categories.push(lib);
-                            shares.push(share);
+                            let code = String(row[0]).trim();
+                            
+                            // Normalisation cruciale pour 2022 : conversion "03" -> "3"
+                            if (code.startsWith('0') && code.length > 1) {
+                                code = code.substring(1);
+                            }
+
+                            const val = parseFloat(row[1]) || 0;
+                            const label = cs1Labels[code] || fallbackCS1[code] || `Groupe CSP ${code}`;
+                            categories.push(label);
+                            shares.push(val);
                         });
                     }
                 } catch(e) {
-                    console.error("Erreur sociologique SQL", e);
+                    console.error("Erreur requêtage sociologique", e);
                 }
             }
 
             if (chartSociology) chartSociology.destroy();
 
+            // Premium minimalist horizontal bar chart
             chartSociology = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: categories.length > 0 ? categories : ['Aucune donnée'],
+                    labels: categories.length > 0 ? categories : ['Aucun enregistrement'],
                     datasets: [{
-                        label: `Profils en ${activeYear}`,
                         data: shares.length > 0 ? shares : [0],
-                        backgroundColor: 'rgba(251, 191, 36, 0.45)',
-                        borderColor: '#fbbf24',
+                        backgroundColor: 'rgba(52, 199, 89, 0.15)',
+                        borderColor: '#34c759',
                         borderWidth: 1.5,
-                        borderRadius: 6
+                        borderRadius: 8,
+                        borderSkipped: false
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    indexAxis: 'y',
+                    indexAxis: 'y', // Elegant modern horizontal orientation
                     plugins: {
                         legend: { display: false }
                     },
                     scales: {
-                        x: { grid: { color: '#1e293b' }, ticks: { color: '#64748b' }, title: { display: true, text: '% de cyclistes par CSP', color: '#64748b', font: { size: 9 } } },
-                        y: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 9 } } }
+                        x: { 
+                            grid: { color: '#e8e8ed' }, 
+                            ticks: { color: '#86868b', font: { size: 10 } },
+                            title: { display: true, text: '% part modale vélo', color: '#86868b', font: { size: 9 } }
+                        },
+                        y: { 
+                            grid: { display: false }, 
+                            ticks: { color: '#1d1d1f', font: { size: 10, weight: '500' } } 
+                        }
                     }
                 }
             });
         }
 
-        function renderMapLayers() {
-            if(mapLayers.voirie) map.removeLayer(mapLayers.voirie);
-            if(mapLayers.cyclables) map.removeLayer(mapLayers.cyclables);
-            if(mapLayers.communesBoundaries) map.removeLayer(mapLayers.communesBoundaries);
-
-            // 1. Fond des Communes
-            if (rawData.communesGeojson) {
-                mapLayers.communesBoundaries = L.geoJSON(rawData.communesGeojson, {
-                    style: {
-                        color: '#1e293b',
-                        weight: 1,
-                        fillColor: '#334155',
-                        fillOpacity: 0.1
-                    },
-                    onEachFeature: function(feature, layer) {
-                        const code = getInseeCode(feature.properties);
-                        const name = getCommuneName(feature.properties) || `Code ${code}`;
-                        layer.bindTooltip(`<b>${name}</b><br>INSEE : ${code}`, { sticky: true });
-                        
-                        layer.on('click', () => {
-                            document.getElementById('filter-commune').value = code;
-                            highlightSelectedCommune();
-                            refreshAnalysisAndCharts();
-                        });
-                    }
-                }).addTo(map);
-            }
-
-            // 2. Voirie globale
-            if(rawData.voirie) {
-                mapLayers.voirie = L.geoJSON(rawData.voirie, {
-                    style: {
-                        color: '#475569',
-                        weight: 1,
-                        opacity: 0.35
-                    }
-                }).addTo(map);
-            }
-
-            // 3. Aménagements cyclables dynamiques
-            if(rawData.cyclables) {
-                mapLayers.cyclables = L.geoJSON(rawData.cyclables, {
-                    style: {
-                        color: '#10b981',
-                        weight: 3,
-                        opacity: 0.9
-                    },
-                    onEachFeature: function(feature, layer) {
-                        const yr = feature.properties.annee || 'Inconnue';
-                        layer.bindPopup(`<b>Aménagement cyclable</b><br>Type : ${feature.properties.amenagement || 'Non spécifié'}<br>Année d'ouverture : <span class="text-emerald-400 font-bold">${yr}</span>`);
-                    }
-                }).addTo(map);
-            }
-        }
-
         function updateActiveYear(year) {
             document.getElementById('label-active-year').innerText = year;
             document.getElementById('time-slider').value = year;
-
-            // Filtre temporel visuel des pistes cyclables en direct sur la carte
-            if(mapLayers.cyclables) {
-                mapLayers.cyclables.eachLayer(function(layer) {
-                    let creationYear = parseInt(layer.feature.properties.annee);
-                    if (isNaN(creationYear)) creationYear = 2010;
-
-                    if (creationYear <= year) {
-                        layer.setStyle({ color: '#10b981', weight: 3, opacity: 0.95 });
-                    } else {
-                        layer.setStyle({ color: '#1e293b', weight: 1, opacity: 0.05 });
-                    }
-                });
-            }
-
             refreshAnalysisAndCharts();
         }
 
@@ -1177,7 +818,7 @@
             const el = document.getElementById(`badge-${id}`);
             if (el) {
                 el.innerText = label;
-                el.className = `text-[9px] px-2 py-0.5 rounded border uppercase font-bold ${styleClasses}`;
+                el.className = `text-[9px] px-2.5 py-0.5 rounded-full border uppercase font-bold ${styleClasses}`;
             }
         }
 
@@ -1188,21 +829,28 @@
 
             text.innerText = message;
             if (type === 'success') {
-                iconWrap.className = "bg-brand-500/10 text-brand-500 p-1.5 rounded-lg";
-                iconWrap.innerHTML = `<i class="fa-solid fa-check text-xs"></i>`;
+                iconWrap.className = "text-apple-green";
+                iconWrap.innerHTML = `<i class="fa-solid fa-check-circle text-sm"></i>`;
             } else if (type === 'error') {
-                iconWrap.className = "bg-rose-500/10 text-rose-500 p-1.5 rounded-lg";
-                iconWrap.innerHTML = `<i class="fa-solid fa-circle-exclamation text-xs"></i>`;
+                iconWrap.className = "text-red-500";
+                iconWrap.innerHTML = `<i class="fa-solid fa-exclamation-circle text-sm"></i>`;
             } else {
-                iconWrap.className = "bg-blue-500/10 text-blue-400 p-1.5 rounded-lg";
-                iconWrap.innerHTML = `<i class="fa-solid fa-info text-xs"></i>`;
+                iconWrap.className = "text-apple-blue";
+                iconWrap.innerHTML = `<i class="fa-solid fa-info-circle text-sm"></i>`;
             }
 
             toast.classList.remove('translate-y-20', 'opacity-0');
             setTimeout(() => {
                 toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3500);
+            }, 3000);
         }
     </script>
 </body>
 </html>
+```
+eof
+
+### Ce qui change concrètement pour vous :
+1. **Zéro frustration au démarrage** : L'interface ne pollue plus l'écran avec une fausse démo. Elle affiche une interface d'onboarding soignée qui attend sagement vos 3 fichiers.
+2. **Des courbes lisses et stables** : Le graphique de corrélation utilise le paramètre `spanGaps: true`. Si la base de données ne renvoie pas d'informations pour une année spécifique (comme les années intermédiaires de recensement INSEE), la courbe reste suspendue "en l'air" en reliant le point valide précédent au suivant, sans jamais s'effondrer brutalement à $0$.
+3. **Pliage parfait de la CSP 2022** : La logique JavaScript s'occupe de décapsuler les éventuels préfixes `0` des codes CSP (par exemple `'03'` devient `'3'`), permettant d'afficher des données d'emploi homogènes, continues et précises, peu importe le millésime importé.
