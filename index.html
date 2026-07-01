@@ -15,6 +15,8 @@
                         apple: {
                             blue: '#0071e3',
                             green: '#34c759',
+                            orange: '#ff9500',
+                            purple: '#af52de',
                             gray: '#86868b',
                             lightGray: '#f5f5f7',
                             border: '#e8e8ed'
@@ -56,7 +58,7 @@
             </div>
             <div>
                 <h1 class="text-lg font-semibold tracking-tight text-[#1d1d1f] flex items-center gap-2">
-                    GéoVélo Analytics <span class="text-[10px] bg-[#e8e8ed] text-[#1d1d1f] px-2.5 py-0.5 rounded-full font-medium">POC Observatoire</span>
+                    GéoVélo Analytics <span class="text-[10px] bg-[#e8e8ed] text-[#1d1d1f] px-2.5 py-0.5 rounded-full font-medium">Observatoire</span>
                 </h1>
                 <p class="text-xs text-apple-gray">Corrélation temporelle aménagements cyclables & parts modales réelles</p>
             </div>
@@ -75,54 +77,69 @@
         
         <!-- Sidebar Gauche: Importation épurée -->
         <aside class="w-[360px] border-r border-[#e8e8ed] bg-white flex flex-col min-h-0 shrink-0 custom-scrollbar overflow-y-auto">
-            <div class="p-6 border-b border-[#e8e8ed]">
+            <div class="p-5 border-b border-[#e8e8ed]">
                 <h2 class="text-sm font-semibold text-[#1d1d1f] uppercase tracking-wider">Sources de données</h2>
-                <p class="text-xs text-apple-gray mt-1">Glissez vos fichiers pour activer l'analyse</p>
+                <p class="text-xs text-apple-gray mt-1">Déposez vos fichiers pour lancer l'observatoire</p>
             </div>
 
-            <div class="p-6 space-y-6 flex-1">
+            <div class="p-5 space-y-4 flex-1">
                 
                 <!-- Import SQLite -->
-                <div class="space-y-2">
+                <div class="space-y-1">
                     <div class="flex items-center justify-between">
                         <label class="text-xs font-semibold text-[#1d1d1f]">1. Base SQLite INSEE</label>
-                        <span id="badge-sqlite" class="text-[9px] bg-red-55/10 text-red-500 px-2 py-0.5 rounded-full border border-red-100 uppercase font-bold">Inactif</span>
+                        <span id="badge-sqlite" class="text-[9px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full border border-red-200 uppercase font-bold">Inactif</span>
                     </div>
-                    <div id="dropzone-sqlite" class="border border-dashed border-[#d2d2d7] hover:border-apple-blue bg-[#f5f5f7] hover:bg-white transition p-5 rounded-2xl cursor-pointer text-center group">
+                    <div id="dropzone-sqlite" class="border border-dashed border-[#d2d2d7] hover:border-apple-blue bg-[#f5f5f7] hover:bg-white transition p-3.5 rounded-xl cursor-pointer text-center group">
                         <input type="file" id="file-sqlite" accept=".sqlite,.db" class="hidden" />
-                        <div class="space-y-2 pointer-events-none text-apple-gray group-hover:text-[#1d1d1f]">
-                            <i class="fa-solid fa-database text-lg text-apple-gray group-hover:text-apple-blue transition-colors"></i>
+                        <div class="space-y-1 pointer-events-none text-apple-gray group-hover:text-[#1d1d1f]">
+                            <i class="fa-solid fa-database text-md text-apple-gray group-hover:text-apple-blue transition-colors"></i>
                             <div class="text-xs font-medium">Fichier .sqlite ou .db</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Import Cyclables -->
-                <div class="space-y-2">
+                <div class="space-y-1">
                     <div class="flex items-center justify-between">
                         <label class="text-xs font-semibold text-[#1d1d1f]">2. Aménagements (GeoJSON)</label>
-                        <span id="badge-cyclable" class="text-[9px] bg-red-55/10 text-red-500 px-2 py-0.5 rounded-full border border-red-100 uppercase font-bold">Inactif</span>
+                        <span id="badge-cyclable" class="text-[9px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full border border-red-200 uppercase font-bold">Inactif</span>
                     </div>
-                    <div id="dropzone-cyclable" class="border border-dashed border-[#d2d2d7] hover:border-apple-blue bg-[#f5f5f7] hover:bg-white transition p-5 rounded-2xl cursor-pointer text-center group">
+                    <div id="dropzone-cyclable" class="border border-dashed border-[#d2d2d7] hover:border-apple-blue bg-[#f5f5f7] hover:bg-white transition p-3.5 rounded-xl cursor-pointer text-center group">
                         <input type="file" id="file-cyclable" accept=".geojson,.json" class="hidden" />
-                        <div class="space-y-2 pointer-events-none text-apple-gray group-hover:text-[#1d1d1f]">
-                            <i class="fa-solid fa-bicycle text-lg text-apple-gray group-hover:text-apple-blue transition-colors"></i>
-                            <div class="text-xs font-medium">Fichier GeoJSON fusionné</div>
+                        <div class="space-y-1 pointer-events-none text-apple-gray group-hover:text-[#1d1d1f]">
+                            <i class="fa-solid fa-bicycle text-md text-apple-gray group-hover:text-apple-blue transition-colors"></i>
+                            <div class="text-xs font-medium">GeoJSON Aménagements</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Import Voirie -->
-                <div class="space-y-2">
+                <div class="space-y-1">
                     <div class="flex items-center justify-between">
                         <label class="text-xs font-semibold text-[#1d1d1f]">3. Réseau de Voirie (GeoJSON)</label>
-                        <span id="badge-voirie" class="text-[9px] bg-red-55/10 text-red-500 px-2 py-0.5 rounded-full border border-red-100 uppercase font-bold">Inactif</span>
+                        <span id="badge-voirie" class="text-[9px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full border border-red-200 uppercase font-bold">Inactif</span>
                     </div>
-                    <div id="dropzone-voirie" class="border border-dashed border-[#d2d2d7] hover:border-apple-blue bg-[#f5f5f7] hover:bg-white transition p-5 rounded-2xl cursor-pointer text-center group">
+                    <div id="dropzone-voirie" class="border border-dashed border-[#d2d2d7] hover:border-apple-blue bg-[#f5f5f7] hover:bg-white transition p-3.5 rounded-xl cursor-pointer text-center group">
                         <input type="file" id="file-voirie" accept=".geojson,.json" class="hidden" />
-                        <div class="space-y-2 pointer-events-none text-apple-gray group-hover:text-[#1d1d1f]">
-                            <i class="fa-solid fa-route text-lg text-apple-gray group-hover:text-apple-blue transition-colors"></i>
-                            <div class="text-xs font-medium">Fichier GeoJSON voiries</div>
+                        <div class="space-y-1 pointer-events-none text-apple-gray group-hover:text-[#1d1d1f]">
+                            <i class="fa-solid fa-route text-md text-apple-gray group-hover:text-apple-blue transition-colors"></i>
+                            <div class="text-xs font-medium">GeoJSON Voiries</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Import Classification CSV (NOUVEAU) -->
+                <div class="space-y-1">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-semibold text-[#1d1d1f]">4. Typologies Communes (CSV)</label>
+                        <span id="badge-classification" class="text-[9px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full border border-red-200 uppercase font-bold">Inactif</span>
+                    </div>
+                    <div id="dropzone-classification" class="border border-dashed border-[#d2d2d7] hover:border-apple-blue bg-[#f5f5f7] hover:bg-white transition p-3.5 rounded-xl cursor-pointer text-center group">
+                        <input type="file" id="file-classification" accept=".csv" class="hidden" />
+                        <div class="space-y-1 pointer-events-none text-apple-gray group-hover:text-[#1d1d1f]">
+                            <i class="fa-solid fa-file-csv text-md text-apple-gray group-hover:text-apple-blue transition-colors"></i>
+                            <div class="text-xs font-medium">Fichier .csv (commune, code)</div>
                         </div>
                     </div>
                 </div>
@@ -149,7 +166,7 @@
                     </div>
                     <div class="space-y-2">
                         <h3 class="text-xl font-bold text-[#1d1d1f]">Prêt à analyser</h3>
-                        <p class="text-xs text-apple-gray leading-relaxed">Glissez-déposez vos trois fichiers (Base de données SQLite INSEE, tracés cyclables et réseaux de voirie) dans la barre latérale pour initier l'observatoire.</p>
+                        <p class="text-xs text-apple-gray leading-relaxed">Glissez-déposez vos quatre fichiers (Base de données SQLite INSEE, tracés cyclables, réseaux de voirie et le fichier CSV des typologies) dans la barre latérale pour initier l'observatoire.</p>
                     </div>
                 </div>
             </div>
@@ -224,11 +241,11 @@
                         </div>
                     </div>
 
-                    <!-- Graphique Nuage de Points & Régression -->
+                    <!-- Graphique Nuage de Points & Régression (MULTIDIMENSIONNEL COMPLET) -->
                     <div class="bg-white border border-[#e8e8ed] rounded-2xl p-6 shadow-sm flex flex-col h-[380px]">
                         <h3 class="text-xs font-semibold text-[#1d1d1f] uppercase tracking-wider mb-4 flex items-center gap-2">
                             <i class="fa-solid fa-circle-dot text-purple-500"></i>
-                            Corrélation spatiale & Régression (Communes)
+                            Nuage Global & Régression (Tous Millésimes)
                         </h3>
                         <div class="flex-1 relative min-h-0">
                             <canvas id="chart-scatter"></canvas>
@@ -271,17 +288,28 @@
         let transLabels = {};
         let cs1Labels = {};
 
-        // Premium Apple-inspired color palette for consistent commune assignment
-        const communePalette = [
-            '#0071e3', '#34c759', '#af52de', '#ff9500', '#ff2d55',
-            '#5ac8fa', '#ffcc00', '#5856d6', '#ff453a', '#10b981',
-            '#bf5af2', '#ff9f0a', '#64d2ff', '#ffd60a', '#0a84ff'
-        ];
+        // Custom premium Apple palette for the 4 Typologies from the CSV
+        const typologyColors = {
+            1: '#0071e3', // Apple Blue (Type 1)
+            2: '#34c759', // Apple Green (Type 2)
+            3: '#ff9500', // Apple Orange (Type 3)
+            4: '#af52de', // Apple Purple (Type 4)
+            'default': '#86868b' // Neutral Gray
+        };
 
-        // In-memory properties-based data structures (No complex spatial conversion crashes!)
+        const typologyLabels = {
+            1: 'Typologie 1',
+            2: 'Typologie 2',
+            3: 'Typologie 3',
+            4: 'Typologie 4',
+            'default': 'Non classifié'
+        };
+
+        // In-memory properties-based data structures
         let rawData = {
             cyclables: null, 
-            voirie: null     
+            voirie: null,
+            classification: {} // Key: Normalized Commune Name -> Code (1 to 4)
         };
 
         let calculatedMetrics = {
@@ -400,6 +428,7 @@
             configureDropzone('dropzone-sqlite', 'file-sqlite', 'sqlite', 'badge-sqlite');
             configureDropzone('dropzone-cyclable', 'file-cyclable', 'cyclables', 'badge-cyclable');
             configureDropzone('dropzone-voirie', 'file-voirie', 'voirie', 'badge-voirie');
+            configureDropzone('dropzone-classification', 'file-classification', 'classification', 'badge-classification');
         }
 
         function configureDropzone(zoneId, inputId, stateKey, badgeId) {
@@ -453,6 +482,43 @@
                     }
                 };
                 reader.readAsArrayBuffer(file);
+            } else if (stateKey === 'classification') {
+                reader.onload = function(e) {
+                    try {
+                        const text = e.target.result;
+                        const lines = text.split('\n');
+                        let count = 0;
+                        rawData.classification = {};
+
+                        // Simple tolerant CSV parser: supports both comma and semi-colon delimiter
+                        let separator = ';';
+                        if (lines[0] && lines[0].includes(',')) {
+                            separator = ',';
+                        }
+
+                        // Parse lines
+                        lines.forEach((line, index) => {
+                            if (index === 0 || !line.trim()) return; // skip header or empty line
+                            const cols = line.split(separator);
+                            if (cols.length >= 2) {
+                                const comNorm = normalizeCommuneName(cols[0].trim());
+                                const code = parseInt(cols[1].trim());
+                                if (comNorm && !isNaN(code)) {
+                                    rawData.classification[comNorm] = code;
+                                    count++;
+                                }
+                            }
+                        });
+
+                        updateBadge(badgeId, 'Actif', 'bg-apple-blue/10 border-apple-blue/20 text-apple-blue');
+                        showNotification(`${count} communes classifiées chargées !`, "success");
+                        checkActivationStatus();
+                    } catch(err) {
+                        showNotification("Erreur lors de la lecture du fichier CSV.", "error");
+                        console.error(err);
+                    }
+                };
+                reader.readAsText(file);
             } else {
                 reader.onload = function(e) {
                     try {
@@ -494,8 +560,10 @@
             }
         }
 
-        // Check if all files are active to transition from Onboarding to Dashboard
+        // Check if required files are active to transition from Onboarding to Dashboard
         function checkActivationStatus() {
+            // We require SQLite, cyclables, and voirie to launch the engine. 
+            // CSV classification is optional but highly recommended to color the scatter plot.
             if (sqliteDb && rawData.cyclables && rawData.voirie) {
                 document.getElementById('onboarding-screen').classList.add('hidden');
                 document.getElementById('dashboard-content').classList.remove('hidden');
@@ -635,7 +703,7 @@
 
             // Draw premium charts
             renderCorrelationChart(selectedCommune);
-            renderScatterPlot(activeYear);
+            renderScatterPlot(selectedCommune); // Now depends on commune selection, plotting ALL years
             renderSociologyChart(selectedCommune, activeYear);
         }
 
@@ -668,7 +736,7 @@
                     { x: minX, y: slope * minX + intercept },
                     { x: maxX, y: slope * maxX + intercept }
                 ],
-                borderColor: '#86868b',
+                borderColor: '#1d1d1f',
                 borderWidth: 1.5,
                 borderDash: [5, 5],
                 fill: false,
@@ -678,46 +746,77 @@
             };
         }
 
-        function renderScatterPlot(activeYear) {
+        function renderScatterPlot(selectedCommune) {
             const ctx = document.getElementById('chart-scatter').getContext('2d');
-            const scatterPoints = [];
-            const datasets = [];
+            
+            // Map datasets according to classification code (1, 2, 3, 4, and 'default')
+            const categorizedPoints = {
+                1: [],
+                2: [],
+                3: [],
+                4: [],
+                'default': []
+            };
 
-            calculatedMetrics.communesList.forEach((com, index) => {
+            const targetCommunes = selectedCommune === 'ALL' ? calculatedMetrics.communesList : [selectedCommune];
+
+            // 1. Traverse all target communes across ALL years
+            targetCommunes.forEach(com => {
                 const road = calculatedMetrics.roadLengths[com] || 0;
-                const bike = (calculatedMetrics.bikeLengthsByYear[com] && calculatedMetrics.bikeLengthsByYear[com][activeYear]) || 0;
-                const ratio = road > 0 ? (bike / road) * 100 : 0;
+                if (road === 0) return;
 
-                let share = null;
-                if (sqliteDb) {
-                    const inseeCode = inseeMapping[com] || com;
-                    const q = `SELECT SUM(CASE WHEN trans = '3' THEN value ELSE 0 END) * 100.0 / NULLIF(SUM(value), 0) FROM mobpro_agg WHERE year = ${activeYear} AND geo = '${inseeCode}'`;
-                    try {
-                        const res = sqliteDb.exec(q);
-                        if (res.length > 0 && res[0].values[0][0] !== null) {
-                            share = parseFloat(res[0].values[0][0]);
-                        }
-                    } catch(e) {}
-                }
+                // Determine classification code
+                const typCode = rawData.classification[com] || 'default';
 
-                if (ratio > 0 && share !== null && !isNaN(share)) {
-                    const cleanName = com.replace(/_/g, " ");
-                    const color = communePalette[index % communePalette.length];
-                    const pt = { x: ratio, y: share, label: cleanName };
-                    
-                    scatterPoints.push(pt);
+                calculatedMetrics.allYears.forEach(year => {
+                    const bike = (calculatedMetrics.bikeLengthsByYear[com] && calculatedMetrics.bikeLengthsByYear[com][year]) || 0;
+                    const ratio = (bike / road) * 100;
+
+                    let share = null;
+                    if (sqliteDb) {
+                        const inseeCode = inseeMapping[com] || com;
+                        const q = `SELECT SUM(CASE WHEN trans = '3' THEN value ELSE 0 END) * 100.0 / NULLIF(SUM(value), 0) FROM mobpro_agg WHERE year = ${year} AND geo = '${inseeCode}'`;
+                        try {
+                            const res = sqliteDb.exec(q);
+                            if (res.length > 0 && res[0].values[0][0] !== null) {
+                                share = parseFloat(res[0].values[0][0]);
+                            }
+                        } catch(e) {}
+                    }
+
+                    if (ratio > 0 && share !== null && !isNaN(share)) {
+                        const cleanName = com.replace(/_/g, " ");
+                        categorizedPoints[typCode].push({
+                            x: ratio,
+                            y: share,
+                            label: cleanName,
+                            year: year
+                        });
+                    }
+                });
+            });
+
+            // 2. Build datasets list based on typology categories
+            const datasets = [];
+            const allActivePlottedPoints = [];
+
+            [1, 2, 3, 4, 'default'].forEach(code => {
+                const pts = categorizedPoints[code];
+                if (pts.length > 0) {
+                    allActivePlottedPoints.push(...pts);
                     datasets.push({
-                        label: cleanName,
-                        data: [pt],
-                        backgroundColor: color,
-                        borderColor: color,
-                        pointRadius: 6,
-                        pointHoverRadius: 8
+                        label: typologyLabels[code],
+                        data: pts,
+                        backgroundColor: typologyColors[code] || typologyColors['default'],
+                        borderColor: typologyColors[code] || typologyColors['default'],
+                        pointRadius: 4.5,
+                        pointHoverRadius: 6.5
                     });
                 }
             });
 
-            const regression = getRegressionLineDataset(scatterPoints);
+            // 3. Add global regression line computed over ALL plotted historical data points
+            const regression = getRegressionLineDataset(allActivePlottedPoints);
             if (regression) {
                 datasets.push(regression);
             }
@@ -731,13 +830,21 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false }, // Avoid massive legend pollution
+                        legend: { 
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                boxWidth: 10,
+                                font: { size: 9, weight: '500' },
+                                color: '#1d1d1f'
+                            }
+                        },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
                                     const pt = context.raw;
                                     if (context.dataset.type === 'line') return context.dataset.label;
-                                    return `${pt.label} : Cyclabilité ${pt.x.toFixed(1)}%, Part Modale ${pt.y.toFixed(1)}%`;
+                                    return `${pt.label} (${pt.year}) : Cyclabilité ${pt.x.toFixed(1)}%, Part Modale ${pt.y.toFixed(1)}%`;
                                 }
                             }
                         }
@@ -796,7 +903,6 @@
                     } catch(e) {}
                 }
 
-                // If no database data is found for this year, store as NaN so Chart.js can span the gap seamlessly
                 rawRatioPoints.push(ptRatio);
                 rawModalSharePoints.push((share !== null && share > 0) ? share : NaN);
                 validLabels.push(yr);
@@ -875,7 +981,6 @@
             const shares = [];
 
             if (sqliteDb) {
-                // Highly robust SQL query with LEFT JOIN on metadata ref and normalizations
                 let q = `
                     SELECT 
                         cs1,
@@ -895,7 +1000,7 @@
                         res[0].values.forEach(row => {
                             let code = String(row[0]).trim();
                             
-                            // Normalisation cruciale pour 2022 : conversion "03" -> "3"
+                            // 2022 normalization fallback "03" -> "3"
                             if (code.startsWith('0') && code.length > 1) {
                                 code = code.substring(1);
                             }
@@ -913,7 +1018,6 @@
 
             if (chartSociology) chartSociology.destroy();
 
-            // Premium minimalist horizontal bar chart
             chartSociology = new Chart(ctx, {
                 type: 'bar',
                 data: {
