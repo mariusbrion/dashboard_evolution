@@ -227,7 +227,7 @@
                     </div>
                 </div>
 
-                <!-- Charts Analytical Area (Grid 2x2) -->
+                <!-- Charts Analytical Area (Grid 2x2 with full-width bottom layout) -->
                 <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 shrink-0">
                     
                     <!-- Graphique Temporel Principal (starts 2016) -->
@@ -260,6 +260,7 @@
                                 </select>
                                 <select id="select-regression-type" class="bg-[#f5f5f7] border border-[#e8e8ed] rounded-lg py-1 px-2.5 text-[10px] font-medium text-[#1d1d1f] focus:border-apple-blue outline-none cursor-pointer">
                                     <option value="linear">Modèle Linéaire</option>
+                                    <option value="segmented">Modèle Segmenté par Typo</option>
                                     <option value="polynomial">Modèle Quadratique (Degré 2)</option>
                                     <option value="logarithmic">Modèle Logarithmique</option>
                                 </select>
@@ -310,14 +311,42 @@
                         </div>
                     </div>
 
-                    <!-- Graphique Impact Territorial vs Socio-Revenu (28 Communes grouped side-by-side) -->
+                    <!-- NOUVEAU : Graphique de Répartition Modale Globale (Doughnut) -->
                     <div class="bg-white border border-[#e8e8ed] rounded-2xl p-6 shadow-sm flex flex-col h-[460px]">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-xs font-semibold text-[#1d1d1f] uppercase tracking-wider flex items-center gap-2">
-                                <i class="fa-solid fa-globe text-apple-orange"></i>
-                                Impact Territorial vs Structure Socio-Professionnelle
-                            </h3>
-                            <span class="text-[9px] bg-apple-blue/5 text-apple-blue border border-apple-blue/10 px-2 py-0.5 rounded-full font-medium">Comparatif 28 Communes</span>
+                        <h3 class="text-xs font-semibold text-[#1d1d1f] uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie text-apple-blue"></i>
+                            Répartition Modale Globale des Déplacements (Tous Transports)
+                        </h3>
+                        <div class="flex-1 relative min-h-0">
+                            <canvas id="chart-modal-mix"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Graphique Impact Territorial vs Socio-Revenu (28 Communes - FULL WIDTH) -->
+                    <div class="bg-white border border-[#e8e8ed] rounded-2xl p-6 shadow-sm flex flex-col h-[500px] lg:col-span-2">
+                        <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+                            <div class="flex items-center space-x-2">
+                                <h3 class="text-xs font-semibold text-[#1d1d1f] uppercase tracking-wider flex items-center gap-2">
+                                    <i class="fa-solid fa-globe text-apple-orange"></i>
+                                    Analyse Spatiale et Territoriale par CSP
+                                </h3>
+                                <span class="text-[9px] bg-apple-orange/10 text-apple-orange border border-apple-orange/20 px-2 py-0.5 rounded-full font-bold">Groupé par Typologie</span>
+                            </div>
+                            
+                            <!-- Sélecteur de CSP dynamique -->
+                            <div class="flex items-center space-x-2">
+                                <label class="text-[10px] font-semibold text-apple-gray uppercase tracking-wider">Sélection CSP :</label>
+                                <select id="select-territory-csp" class="bg-[#f5f5f7] border border-[#e8e8ed] rounded-lg py-1 px-2.5 text-[10px] font-semibold text-[#1d1d1f] focus:border-apple-blue outline-none cursor-pointer transition">
+                                    <option value="3">Cadres & Prof. Sup.</option>
+                                    <option value="1">Agriculteurs</option>
+                                    <option value="2">Artisans / Chefs d'entr.</option>
+                                    <option value="4">Prof. Intermédiaires</option>
+                                    <option value="5">Employés</option>
+                                    <option value="6">Ouvriers</option>
+                                    <option value="7">Retraités</option>
+                                    <option value="8">Autres Inactifs</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="flex-1 relative min-h-0">
                             <canvas id="chart-territory"></canvas>
@@ -345,6 +374,7 @@
         let chartSociology = null;
         let chartScatter = null;
         let chartTerritory = null;
+        let chartModalMix = null;
         let animationInterval = null;
         
         let transLabels = {};
@@ -424,6 +454,14 @@
             "8": "Autres Inactifs"
         };
 
+        const fallbackTrans = {
+            "1": "Pas de transport (Marche)",
+            "2": "Deux-roues motorisé",
+            "3": "Vélo",
+            "4": "Voiture / Utilitaire",
+            "5": "Transports en commun"
+        };
+
         let SQLInstance = null;
 
         // On window load
@@ -485,7 +523,7 @@
                 refreshAnalysisAndCharts();
             });
 
-            // Advanced Regression & Scatter controls listeners
+            // Advanced Regression, Scatter & CSP list controllers listeners
             document.getElementById('select-regression-type').addEventListener('change', () => {
                 refreshAnalysisAndCharts();
             });
@@ -493,6 +531,9 @@
                 refreshAnalysisAndCharts();
             });
             document.getElementById('sim-slider').addEventListener('input', () => {
+                refreshAnalysisAndCharts();
+            });
+            document.getElementById('select-territory-csp').addEventListener('change', () => {
                 refreshAnalysisAndCharts();
             });
         }
@@ -628,9 +669,30 @@
                 if (resCs1.length > 0) {
                     resCs1[0].values.forEach(r => { cs1Labels[String(r[0]).trim()] = String(r[1]).trim(); });
                 }
+                // Sync labels with territory select options
+                updateCspSelectorOptions();
             } catch(e) {
                 console.warn("Table ref_cs1 non disponible.");
             }
+        }
+
+        // Dynamically rebuild CSP list in territory select options to respect database terminology if loaded
+        function updateCspSelectorOptions() {
+            const select = document.getElementById('select-territory-csp');
+            if (!select) return;
+            const currentValue = select.value || "3";
+            select.innerHTML = '';
+            
+            const codes = ["1", "2", "3", "4", "5", "6", "7", "8"];
+            codes.forEach(code => {
+                const opt = document.createElement('option');
+                opt.value = code;
+                opt.innerText = cs1Labels[code] || fallbackCS1[code] || `Groupe CSP ${code}`;
+                if (code === currentValue) {
+                    opt.selected = true;
+                }
+                select.appendChild(opt);
+            });
         }
 
         // Check if required files are active to transition from Onboarding to Dashboard
@@ -776,6 +838,7 @@
             renderCorrelationChart(selectedCommune);
             renderScatterPlot(selectedCommune); 
             renderSociologyChart(selectedCommune, activeYear);
+            renderModalMixChart(selectedCommune, activeYear);
             renderTerritoryChart(selectedCommune, activeYear);
         }
 
@@ -987,38 +1050,88 @@
                 }
             });
 
-            // 3. Compute and plot advanced regression
-            const regressionResult = computeRegression(allActivePoints, regType);
-            if (regressionResult) {
-                const xValues = allActivePoints.map(p => p.x);
-                const minX = Math.min(...xValues);
-                const maxX = Math.max(...xValues);
+            // 3. Compute and plot advanced regressions
+            let activeRegressionModel = null;
 
-                // Create a smooth curve of 40 intervals
-                const curvePoints = [];
-                const steps = 40;
-                for (let i = 0; i <= steps; i++) {
-                    const targetX = minX + (i / steps) * (maxX - minX);
-                    curvePoints.push({ x: targetX, y: regressionResult.predict(targetX) });
-                }
+            if (regType === 'segmented') {
+                // Compute independent regressions for each active typology group
+                [1, 2, 3, 4, 'default'].forEach(code => {
+                    const pts = categorizedPoints[code];
+                    if (pts && pts.length >= 2) {
+                        const groupReg = computeRegression(pts, 'linear');
+                        if (groupReg) {
+                            const gXVals = pts.map(p => p.x);
+                            const minX = Math.min(...gXVals);
+                            const maxX = Math.max(...gXVals);
 
-                datasets.push({
-                    label: `Tendance (${regressionResult.type})`,
-                    type: 'line',
-                    data: curvePoints,
-                    borderColor: '#1d1d1f',
-                    borderWidth: 1.5,
-                    borderDash: [5, 5],
-                    fill: false,
-                    pointRadius: 0,
-                    hoverRadius: 0,
-                    showLine: true
+                            datasets.push({
+                                label: `Tendance ${typologyLabels[code]} (R² = ${groupReg.r2.toFixed(3)})`,
+                                type: 'line',
+                                data: [
+                                    { x: minX, y: groupReg.predict(minX) },
+                                    { x: maxX, y: groupReg.predict(maxX) }
+                                ],
+                                borderColor: typologyColors[code],
+                                borderWidth: 1.5,
+                                borderDash: [4, 4],
+                                fill: false,
+                                pointRadius: 0,
+                                hoverRadius: 0,
+                                showLine: true
+                            });
+
+                            // For simulator prediction model fallback
+                            if (selectedCommune !== 'ALL') {
+                                const currentCommuneTypology = rawData.classification[selectedCommune] || 'default';
+                                if (String(currentCommuneTypology) === String(code)) {
+                                    activeRegressionModel = groupReg;
+                                }
+                            }
+                        }
+                    }
                 });
 
-                // Run impact predictor simulation in real-time
-                updatePredictiveSimulation(regressionResult, targetCommunes, typologyFilter);
+                // Global fallback if no specific active commune model is isolated
+                if (!activeRegressionModel) {
+                    activeRegressionModel = computeRegression(allActivePoints, 'linear');
+                }
             } else {
-                // Clear the simulation widget if data is insufficient
+                // Global standard single regression model
+                const regressionResult = computeRegression(allActivePoints, regType);
+                if (regressionResult) {
+                    activeRegressionModel = regressionResult;
+                    const xValues = allActivePoints.map(p => p.x);
+                    const minX = Math.min(...xValues);
+                    const maxX = Math.max(...xValues);
+
+                    // Create smooth curve representation for nonlinear regressions
+                    const curvePoints = [];
+                    const steps = 40;
+                    for (let i = 0; i <= steps; i++) {
+                        const targetX = minX + (i / steps) * (maxX - minX);
+                        curvePoints.push({ x: targetX, y: regressionResult.predict(targetX) });
+                    }
+
+                    datasets.push({
+                        label: `Tendance (${regressionResult.type === 'polynomial' ? 'quadratique' : regressionResult.type})`,
+                        type: 'line',
+                        data: curvePoints,
+                        borderColor: '#1d1d1f',
+                        borderWidth: 1.5,
+                        borderDash: [5, 5],
+                        fill: false,
+                        pointRadius: 0,
+                        hoverRadius: 0,
+                        showLine: true
+                    });
+                }
+            }
+
+            // Update user predictive simulator based on selected model
+            if (activeRegressionModel) {
+                updatePredictiveSimulation(activeRegressionModel, targetCommunes, typologyFilter, regType);
+            } else {
+                // Insufficient points layout fallback
                 document.getElementById('sim-baseline-val').innerText = '-- %';
                 document.getElementById('sim-impact-val').innerText = 'Insuffisant de points pour modéliser';
                 document.getElementById('sim-confidence-badge').className = "hidden";
@@ -1072,7 +1185,7 @@
         }
 
         // Live updating simulation calculations based on custom algebraic model and user slider
-        function updatePredictiveSimulation(regression, targetCommunes, typologyFilter) {
+        function updatePredictiveSimulation(regression, targetCommunes, typologyFilter, regType) {
             const activeYear = parseInt(document.getElementById('time-slider').value);
             const simDeltaInput = document.getElementById('sim-slider');
             const deltaX = simDeltaInput ? parseFloat(simDeltaInput.value) : 2.0;
@@ -1126,7 +1239,7 @@
 
             const eqVal = document.getElementById('sim-equation-val');
             if (eqVal) {
-                eqVal.innerText = regression.equation;
+                eqVal.innerText = `${regType === 'segmented' ? '[Typo] ' : ''}${regression.equation}`;
             }
         }
 
@@ -1323,81 +1436,161 @@
             });
         }
 
-        // New 4th spatial analysis comparison chart: Territorial impact vs Socio-Revenu
-        // Plots the 28 communes of the Métropole side-by-side (224 bars) for each CSP, highlighting selected communes
+        // NOUVEAU GRAPHISME : Modal Share Breakdown pie chart (Doughnut) to contextualize bicycle usage
+        function renderModalMixChart(selectedCommune, activeYear) {
+            const ctx = document.getElementById('chart-modal-mix').getContext('2d');
+            const labels = [];
+            const values = [];
+            const colors = {
+                "1": "#ff9500", // Apple Orange (Pas de transport / Marche)
+                "2": "#af52de", // Apple Purple (Deux-roues)
+                "3": "#34c759", // Apple Green (Vélo)
+                "4": "#86868b", // Apple Gray (Voiture)
+                "5": "#0071e3", // Apple Blue (Transports en commun)
+                "default": "#d2d2d7"
+            };
+            const backgroundColors = [];
+
+            if (sqliteDb) {
+                let q = `
+                    SELECT 
+                        trans,
+                        SUM(value) as total_val
+                    FROM mobpro_agg
+                    WHERE year = ${activeYear} AND trans IS NOT NULL AND trans != ''
+                `;
+                if (selectedCommune !== 'ALL') {
+                    const code = inseeMapping[selectedCommune] || selectedCommune;
+                    q += ` AND geo = '${code}'`;
+                }
+                q += ` GROUP BY trans ORDER BY total_val DESC;`;
+
+                try {
+                    const res = sqliteDb.exec(q);
+                    if (res.length > 0) {
+                        res[0].values.forEach(row => {
+                            const code = String(row[0]).trim();
+                            const val = parseFloat(row[1]) || 0;
+                            const label = transLabels[code] || fallbackTrans[code] || `Mode ${code}`;
+                            
+                            labels.push(label);
+                            values.push(val);
+                            backgroundColors.push(colors[code] || colors["default"]);
+                        });
+                    }
+                } catch(e) {
+                    console.error("Erreur requêtage mix modal", e);
+                }
+            }
+
+            if (chartModalMix) chartModalMix.destroy();
+
+            chartModalMix = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels.length > 0 ? labels : ['Aucune donnée'],
+                    datasets: [{
+                        data: values.length > 0 ? values : [1],
+                        backgroundColor: backgroundColors.length > 0 ? backgroundColors : [colors["default"]],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 12,
+                                color: '#1d1d1f',
+                                font: { family: 'Inter', size: 10, weight: '500' }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const val = context.raw;
+                                    const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+                                    return ` ${context.label}: ${val.toLocaleString('fr-FR')} (${pct}%)`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        // Highly optimized 4th spatial analysis comparison chart: Territorial impact vs Socio-Revenu
+        // Displays single CSP dynamically, ordered by Typology (T1, T2, T3, T4, non classified), colored by Typology
         function renderTerritoryChart(selectedCommune, activeYear) {
             const canvas = document.getElementById('chart-territory');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
+            
+            const selectedCsp = document.getElementById('select-territory-csp').value;
 
-            const cspCategories = ['1', '2', '3', '4', '5', '6', '7', '8'];
-            const cspLabels = cspCategories.map(code => cs1Labels[code] || fallbackCS1[code] || `Groupe ${code}`);
+            // 1. Sort communes exclusively by typology code first (1, 2, 3, 4, default), then alphabetically
+            const sortedCommunes = [...calculatedMetrics.communesList].sort((a, b) => {
+                const typA = rawData.classification[a] || 999;
+                const typB = rawData.classification[b] || 999;
+                if (typA !== typB) return typA - typB;
+                return a.localeCompare(b);
+            });
 
-            // Group datasets per Commune, each containing data for the 8 CSP classes
-            const datasets = [];
+            const dataPoints = [];
+            const barColors = [];
+            const borderColors = [];
+            const borderWidths = [];
 
             if (sqliteDb) {
-                // Bulk query to pull territorial dispersion in a single tick
+                // Bulk query to extract bike share for all geos and the active CSP
                 const q = `
-                    SELECT geo, cs1, SUM(CASE WHEN trans = '3' THEN value ELSE 0 END) * 100.0 / NULLIF(SUM(value), 0)
+                    SELECT geo, SUM(CASE WHEN trans = '3' THEN value ELSE 0 END) * 100.0 / NULLIF(SUM(value), 0)
                     FROM mobpro_agg
-                    WHERE year = ${activeYear} AND cs1 IS NOT NULL AND cs1 != ''
-                    GROUP BY geo, cs1;
+                    WHERE year = ${activeYear} AND cs1 = '${selectedCsp}'
+                    GROUP BY geo;
                 `;
 
                 try {
                     const res = sqliteDb.exec(q);
-                    const dataMap = {}; // key: geoInsee -> key: cs1 -> value
+                    const dataMap = {}; // key: geoInsee -> bike_share_val
 
                     if (res.length > 0) {
                         res[0].values.forEach(row => {
                             const geo = String(row[0]).trim();
-                            let cs1 = String(row[1]).trim();
-                            if (cs1.startsWith('0') && cs1.length > 1) {
-                                cs1 = cs1.substring(1);
-                            }
-                            const val = parseFloat(row[2]) || 0;
-
-                            if (!dataMap[geo]) dataMap[geo] = {};
-                            dataMap[geo][cs1] = val;
+                            const val = parseFloat(row[1]) || 0;
+                            dataMap[geo] = val;
                         });
                     }
 
-                    // Traverse our 28 registered Bordeaux Métropole communes list to build datasets
-                    calculatedMetrics.communesList.forEach(comNorm => {
+                    // Build datasets using ordered communes
+                    sortedCommunes.forEach(comNorm => {
                         const inseeCode = inseeMapping[comNorm] || comNorm;
-                        const communeData = dataMap[inseeCode] || {};
+                        const val = dataMap[inseeCode] || 0;
+                        dataPoints.push(val);
 
-                        const dataPoints = cspCategories.map(code => communeData[code] || 0);
+                        const typCode = rawData.classification[comNorm] || 'default';
+                        const baseColor = typologyColors[typCode] || typologyColors['default'];
 
-                        // Define highlight rules
+                        // Highlight active commune selection rules
                         const isSelected = (selectedCommune === comNorm);
                         const isAllMode = (selectedCommune === 'ALL');
 
-                        let bgColor, borderColor, borderWidth;
-
-                        if (isAllMode) {
-                            // Uniform elegant premium color matching the Apple aesthetic
-                            bgColor = 'rgba(0, 113, 227, 0.45)';
-                            borderColor = 'rgba(0, 113, 227, 0.85)';
-                            borderWidth = 1;
+                        if (isAllMode || isSelected) {
+                            barColors.push(baseColor);
+                            borderColors.push(baseColor);
+                            borderWidths.push(1);
                         } else {
-                            // Highlight only the selected commune, grey-out the background
-                            bgColor = isSelected ? 'rgba(0, 113, 227, 0.9)' : 'rgba(134, 134, 139, 0.1)';
-                            borderColor = isSelected ? '#0071e3' : 'rgba(134, 134, 139, 0.2)';
-                            borderWidth = isSelected ? 1.5 : 0.5;
+                            // Subdued gray-out overlay for non-selected elements
+                            barColors.push(baseColor + '20'); // 12% Opacity
+                            borderColors.push(baseColor + '40'); // 25% Opacity
+                            borderWidths.push(0.5);
                         }
-
-                        datasets.push({
-                            label: comNorm.replace(/_/g, " "),
-                            data: dataPoints,
-                            backgroundColor: bgColor,
-                            borderColor: borderColor,
-                            borderWidth: borderWidth,
-                            borderRadius: 2,
-                            barPercentage: 0.85,
-                            categoryPercentage: 0.9
-                        });
                     });
 
                 } catch (e) {
@@ -1407,21 +1600,34 @@
 
             if (chartTerritory) chartTerritory.destroy();
 
+            // Setup a single clean dataset to make bar spaces perfect, readable, and elegant
             chartTerritory = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: cspLabels,
-                    datasets: datasets
+                    labels: sortedCommunes.map(com => com.replace(/_/g, " ")),
+                    datasets: [{
+                        label: 'Part modale vélo (%)',
+                        data: dataPoints,
+                        backgroundColor: barColors,
+                        borderColor: borderColors,
+                        borderWidth: borderWidths,
+                        borderRadius: 4,
+                        barPercentage: 0.75,
+                        categoryPercentage: 0.8
+                    }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false }, // Hide the 28 keys to optimize drawing viewport
+                        legend: { display: false },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return `${context.dataset.label} : ${context.raw.toFixed(2)} %`;
+                                    const comNorm = sortedCommunes[context.dataIndex];
+                                    const typCode = rawData.classification[comNorm] || 'default';
+                                    const typLabel = typologyLabels[typCode];
+                                    return ` ${context.dataset.label}: ${context.raw.toFixed(2)} % (${typLabel})`;
                                 }
                             }
                         }
@@ -1429,7 +1635,12 @@
                     scales: {
                         x: {
                             grid: { display: false },
-                            ticks: { color: '#1d1d1f', font: { size: 9, weight: '500' } }
+                            ticks: { 
+                                color: '#1d1d1f', 
+                                font: { size: 9, weight: '500' },
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
                         },
                         y: {
                             min: 0,
