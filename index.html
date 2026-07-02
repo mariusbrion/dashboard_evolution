@@ -249,8 +249,15 @@
                                 Nuage Global & Modélisation (Tous Millésimes)
                             </h3>
                             <!-- Commandes d'Analyse Avancée -->
-                            <div class="flex items-center space-x-2">
-                                <select id="filter-scatter-typology" class="bg-[#f5f5f7] border border-[#e8e8ed] rounded-lg py-1 px-2.5 text-[10px] font-medium text-[#1d1d1f] focus:border-apple-blue outline-none cursor-pointer">
+                            <div class="flex items-center space-x-2 flex-wrap gap-1">
+                                <!-- Option Effet d'attraction Bordeaux -->
+                                <div class="flex items-center space-x-1.5 bg-[#f5f5f7] border border-[#e8e8ed] rounded-lg py-1 px-2.5">
+                                    <input type="checkbox" id="toggle-bordeaux-spillover" class="w-3.5 h-3.5 text-apple-blue border-gray-300 rounded focus:ring-apple-blue cursor-pointer">
+                                    <label for="toggle-bordeaux-spillover" class="text-[9px] font-bold text-apple-blue cursor-pointer select-none uppercase tracking-wide">
+                                        Attraction Bordeaux
+                                    </label>
+                                </div>
+                                <select id="filter-scatter-typology" class="bg-[#f5f5f7] border border-[#e8e8ed] rounded-lg py-1 px-2 text-[10px] font-medium text-[#1d1d1f] focus:border-apple-blue outline-none cursor-pointer">
                                     <option value="ALL">Toutes Typologies</option>
                                     <option value="1">Typologie 1</option>
                                     <option value="2">Typologie 2</option>
@@ -258,7 +265,7 @@
                                     <option value="4">Typologie 4</option>
                                     <option value="default">Non classifié</option>
                                 </select>
-                                <select id="select-regression-type" class="bg-[#f5f5f7] border border-[#e8e8ed] rounded-lg py-1 px-2.5 text-[10px] font-medium text-[#1d1d1f] focus:border-apple-blue outline-none cursor-pointer">
+                                <select id="select-regression-type" class="bg-[#f5f5f7] border border-[#e8e8ed] rounded-lg py-1 px-2 text-[10px] font-medium text-[#1d1d1f] focus:border-apple-blue outline-none cursor-pointer">
                                     <option value="linear">Modèle Linéaire</option>
                                     <option value="segmented">Modèle Segmenté par Typo</option>
                                     <option value="polynomial">Modèle Quadratique (Degré 2)</option>
@@ -275,7 +282,7 @@
                             <div class="space-y-1.5">
                                 <div class="flex items-center justify-between">
                                     <span class="text-apple-gray font-medium">Hausse de cyclabilité simulée :</span>
-                                    <span id="sim-slider-val" class="font-bold text-apple-blue text-sm">+2.0 %</span>
+                                    <span id="sim-slider-val" class="font-bold text-apple-blue text-xs">+2.0 % (+0.0 km)</span>
                                 </div>
                                 <input type="range" id="sim-slider" min="0.5" max="15.0" step="0.5" value="2.0" class="w-full h-1 bg-[#e8e8ed] rounded-lg appearance-none cursor-pointer accent-apple-blue outline-none">
                                 <div class="text-[9px] text-apple-gray flex justify-between">
@@ -323,14 +330,14 @@
                     </div>
 
                     <!-- Graphique Impact Territorial vs Socio-Revenu (28 Communes - FULL WIDTH) -->
-                    <div class="bg-white border border-[#e8e8ed] rounded-2xl p-6 shadow-sm flex flex-col h-[500px] lg:col-span-2">
+                    <div class="bg-white border border-[#e8e8ed] rounded-2xl p-6 shadow-sm flex flex-col h-[520px] lg:col-span-2">
                         <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
                             <div class="flex items-center space-x-2">
                                 <h3 class="text-xs font-semibold text-[#1d1d1f] uppercase tracking-wider flex items-center gap-2">
                                     <i class="fa-solid fa-globe text-apple-orange"></i>
                                     Analyse Spatiale et Territoriale par CSP
                                 </h3>
-                                <span class="text-[9px] bg-apple-orange/10 text-apple-orange border border-apple-orange/20 px-2 py-0.5 rounded-full font-bold">Groupé par Typologie</span>
+                                <span class="text-[9px] bg-apple-orange/10 text-apple-orange border border-apple-orange/20 px-2 py-0.5 rounded-full font-bold">Classé de la plus haute à la plus basse part modale</span>
                             </div>
                             
                             <!-- Sélecteur de CSP dynamique -->
@@ -534,6 +541,9 @@
                 refreshAnalysisAndCharts();
             });
             document.getElementById('select-territory-csp').addEventListener('change', () => {
+                refreshAnalysisAndCharts();
+            });
+            document.getElementById('toggle-bordeaux-spillover').addEventListener('change', () => {
                 refreshAnalysisAndCharts();
             });
         }
@@ -842,6 +852,13 @@
             renderTerritoryChart(selectedCommune, activeYear);
         }
 
+        // Helper to retrieve Bordeaux local cyclability for spatial lag (Bordeaux Spillover)
+        function getBordeauxCyclability(year) {
+            const bordeauxRoad = calculatedMetrics.roadLengths["BORDEAUX"] || 0;
+            const bordeauxBike = (calculatedMetrics.bikeLengthsByYear["BORDEAUX"] && calculatedMetrics.bikeLengthsByYear["BORDEAUX"][year]) || 0;
+            return bordeauxRoad > 0 ? (bordeauxBike / bordeauxRoad) * 100 : 0;
+        }
+
         // Advanced custom Mathematical Regression Engine (Linear, Polynomial Deg 2, Logarithmic)
         function computeRegression(points, type) {
             if (points.length < 3 && type === 'polynomial') type = 'linear';
@@ -984,6 +1001,7 @@
             const ctx = document.getElementById('chart-scatter').getContext('2d');
             const regType = document.getElementById('select-regression-type').value;
             const typologyFilter = document.getElementById('filter-scatter-typology').value;
+            const spilloverActive = document.getElementById('toggle-bordeaux-spillover').checked;
             
             // Map datasets according to classification code (1, 2, 3, 4, and 'default')
             const categorizedPoints = {
@@ -1005,7 +1023,18 @@
 
                 calculatedMetrics.allYears.forEach(year => {
                     const bike = (calculatedMetrics.bikeLengthsByYear[com] && calculatedMetrics.bikeLengthsByYear[com][year]) || 0;
-                    const ratio = (bike / road) * 100;
+                    let ratio = road > 0 ? (bike / road) * 100 : 0;
+
+                    // Apply Spatial spillover weight if commuter attraction toggle is checked
+                    if (spilloverActive && com !== 'BORDEAUX') {
+                        const bordeauxRatio = getBordeauxCyclability(year);
+                        let alpha = 0.05; // Base attraction
+                        if (String(typCode) === '1') alpha = 0.45; // High commuter share (first ring)
+                        else if (String(typCode) === '2') alpha = 0.25; // Moderate commuter share
+                        else if (String(typCode) === '3') alpha = 0.10; // Low commuter share
+                        
+                        ratio = (1 - alpha) * ratio + alpha * bordeauxRatio;
+                    }
 
                     let share = null;
                     if (sqliteDb) {
@@ -1172,7 +1201,7 @@
                             position: 'bottom',
                             grid: { color: '#e8e8ed' },
                             ticks: { color: '#86868b', font: { size: 10 } },
-                            title: { display: true, text: 'Taux de cyclabilité (%)', color: '#1d1d1f', font: { size: 10, weight: '600' } }
+                            title: { display: true, text: 'Taux de cyclabilité (%)' + (spilloverActive ? ' [Ajusté attraction Bordeaux]' : ''), color: '#1d1d1f', font: { size: 10, weight: '600' } }
                         },
                         y: {
                             grid: { color: '#e8e8ed' },
@@ -1190,10 +1219,7 @@
             const simDeltaInput = document.getElementById('sim-slider');
             const deltaX = simDeltaInput ? parseFloat(simDeltaInput.value) : 2.0;
 
-            // Update simulator text value
-            document.getElementById('sim-slider-val').innerText = `+${deltaX.toFixed(1)} %`;
-
-            // Calculate active baseline cyclability
+            // Calculate active baseline cyclability and accumulate road length to represent physical Delta in Kilometers
             let totalRoad = 0;
             let totalBike = 0;
 
@@ -1204,6 +1230,12 @@
                 totalRoad += calculatedMetrics.roadLengths[com] || 0;
                 totalBike += (calculatedMetrics.bikeLengthsByYear[com] && calculatedMetrics.bikeLengthsByYear[com][activeYear]) || 0;
             });
+
+            // Delta Km represented by simulated percentage increment over the selected scope
+            const deltaKm = (deltaX / 100) * totalRoad;
+
+            // Update simulator text value dynamically
+            document.getElementById('sim-slider-val').innerText = `+${deltaX.toFixed(1)} % (+${deltaKm.toFixed(1)} km)`;
 
             const currentCyclability = totalRoad > 0 ? (totalBike / totalRoad) * 100 : 0;
             const simulatedCyclability = currentCyclability + deltaX;
@@ -1436,7 +1468,7 @@
             });
         }
 
-        // NOUVEAU GRAPHISME : Modal Share Breakdown pie chart (Doughnut) to contextualize bicycle usage
+        // Modal Share Breakdown pie chart (Doughnut) to contextualize bicycle usage
         function renderModalMixChart(selectedCommune, activeYear) {
             const ctx = document.getElementById('chart-modal-mix').getContext('2d');
             const labels = [];
@@ -1526,7 +1558,7 @@
         }
 
         // Highly optimized 4th spatial analysis comparison chart: Territorial impact vs Socio-Revenu
-        // Displays single CSP dynamically, ordered by Typology (T1, T2, T3, T4, non classified), colored by Typology
+        // Displays single CSP dynamically, colored by Typology, and SORTED from highest modal share to lowest
         function renderTerritoryChart(selectedCommune, activeYear) {
             const canvas = document.getElementById('chart-territory');
             if (!canvas) return;
@@ -1534,18 +1566,7 @@
             
             const selectedCsp = document.getElementById('select-territory-csp').value;
 
-            // 1. Sort communes exclusively by typology code first (1, 2, 3, 4, default), then alphabetically
-            const sortedCommunes = [...calculatedMetrics.communesList].sort((a, b) => {
-                const typA = rawData.classification[a] || 999;
-                const typB = rawData.classification[b] || 999;
-                if (typA !== typB) return typA - typB;
-                return a.localeCompare(b);
-            });
-
-            const dataPoints = [];
-            const barColors = [];
-            const borderColors = [];
-            const borderWidths = [];
+            const tempStats = [];
 
             if (sqliteDb) {
                 // Bulk query to extract bike share for all geos and the active CSP
@@ -1568,46 +1589,63 @@
                         });
                     }
 
-                    // Build datasets using ordered communes
-                    sortedCommunes.forEach(comNorm => {
+                    // Collect metrics for all 28 communes to allow dynamic sorting
+                    calculatedMetrics.communesList.forEach(comNorm => {
                         const inseeCode = inseeMapping[comNorm] || comNorm;
                         const val = dataMap[inseeCode] || 0;
-                        dataPoints.push(val);
-
-                        const typCode = rawData.classification[comNorm] || 'default';
-                        const baseColor = typologyColors[typCode] || typologyColors['default'];
-
-                        // Highlight active commune selection rules
-                        const isSelected = (selectedCommune === comNorm);
-                        const isAllMode = (selectedCommune === 'ALL');
-
-                        if (isAllMode || isSelected) {
-                            barColors.push(baseColor);
-                            borderColors.push(baseColor);
-                            borderWidths.push(1);
-                        } else {
-                            // Subdued gray-out overlay for non-selected elements
-                            barColors.push(baseColor + '20'); // 12% Opacity
-                            borderColors.push(baseColor + '40'); // 25% Opacity
-                            borderWidths.push(0.5);
-                        }
+                        tempStats.push({
+                            name: comNorm,
+                            val: val,
+                            typCode: rawData.classification[comNorm] || 'default'
+                        });
                     });
+
+                    // Sort communes dynamically from HIGHEST to LOWEST bicycle modal share
+                    tempStats.sort((a, b) => b.val - a.val);
 
                 } catch (e) {
                     console.error("Erreur requêtage impact territorial", e);
                 }
             }
 
+            const sortedLabels = tempStats.map(item => item.name.replace(/_/g, " "));
+            const sortedDataPoints = tempStats.map(item => item.val);
+            
+            const barColors = [];
+            const borderColors = [];
+            const borderWidths = [];
+
+            tempStats.forEach(item => {
+                const comNorm = item.name;
+                const typCode = item.typCode;
+                const baseColor = typologyColors[typCode] || typologyColors['default'];
+
+                // Highlight active commune selection rules
+                const isSelected = (selectedCommune === comNorm);
+                const isAllMode = (selectedCommune === 'ALL');
+
+                if (isAllMode || isSelected) {
+                    barColors.push(baseColor);
+                    borderColors.push(baseColor);
+                    borderWidths.push(1);
+                } else {
+                    // Subdued gray-out overlay for non-selected elements
+                    barColors.push(baseColor + '20'); // 12% Opacity
+                    borderColors.push(baseColor + '40'); // 25% Opacity
+                    borderWidths.push(0.5);
+                }
+            });
+
             if (chartTerritory) chartTerritory.destroy();
 
-            // Setup a single clean dataset to make bar spaces perfect, readable, and elegant
+            // Setup a single clean dataset with un-capped y-axis (max: undefined) to scale dynamically
             chartTerritory = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: sortedCommunes.map(com => com.replace(/_/g, " ")),
+                    labels: sortedLabels,
                     datasets: [{
                         label: 'Part modale vélo (%)',
-                        data: dataPoints,
+                        data: sortedDataPoints,
                         backgroundColor: barColors,
                         borderColor: borderColors,
                         borderWidth: borderWidths,
@@ -1624,8 +1662,8 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    const comNorm = sortedCommunes[context.dataIndex];
-                                    const typCode = rawData.classification[comNorm] || 'default';
+                                    const comNorm = tempStats[context.dataIndex].name;
+                                    const typCode = tempStats[context.dataIndex].typCode;
                                     const typLabel = typologyLabels[typCode];
                                     return ` ${context.dataset.label}: ${context.raw.toFixed(2)} % (${typLabel})`;
                                 }
@@ -1644,7 +1682,7 @@
                         },
                         y: {
                             min: 0,
-                            max: 100, // Normalized baseline comparison
+                            // Cap removed completely so maximum height adjusts dynamically to maximum modal share observed
                             grid: { color: '#e8e8ed' },
                             ticks: { color: '#86868b', font: { size: 10 } },
                             title: { display: true, text: 'Part Modale Vélo (%)', color: '#86868b', font: { size: 9 } }
