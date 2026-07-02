@@ -129,7 +129,7 @@
                     </div>
                 </div>
 
-                <!-- Import Classification CSV (NOUVEAU) -->
+                <!-- Import Classification CSV -->
                 <div class="space-y-1">
                     <div class="flex items-center justify-between">
                         <label class="text-xs font-semibold text-[#1d1d1f]">4. Typologies Communes (CSV)</label>
@@ -146,7 +146,7 @@
 
                 <!-- Sélecteur de commune (masqué par défaut) -->
                 <div id="wrapper-filter-commune" class="space-y-2 pt-4 border-t border-[#e8e8ed] hidden">
-                    <label class="text-xs font-semibold text-[#1d1d1f]">Filtrer l'analyse</label>
+                    <label class="text-xs font-semibold text-[#1d1d1f]">Filtrer l'analyse spatiale</label>
                     <select id="filter-commune" class="w-full bg-white border border-[#d2d2d7] rounded-xl py-2 px-3 text-xs text-[#1d1d1f] focus:border-apple-blue outline-none transition">
                         <option value="ALL">Toutes les communes</option>
                     </select>
@@ -172,7 +172,7 @@
             </div>
 
             <!-- Contenu du Dashboard analytique (masqué au début) -->
-            <div id="dashboard-content" class="flex-1 flex flex-col min-h-0 hidden">
+            <div id="dashboard-content" class="flex-1 flex flex-col min-h-0 hidden overflow-y-auto custom-scrollbar">
                 
                 <!-- Statistiques Clés horizontales -->
                 <div class="grid grid-cols-4 gap-6 p-6 shrink-0 bg-[#f5f5f7]">
@@ -227,39 +227,100 @@
                     </div>
                 </div>
 
-                <!-- Charts Analytical Area -->
-                <div class="flex-1 p-6 grid grid-cols-1 xl:grid-cols-3 gap-6 overflow-y-auto custom-scrollbar">
+                <!-- Charts Analytical Area (Grid 2x2) -->
+                <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 shrink-0">
                     
-                    <!-- Graphique Temporel Principal -->
-                    <div class="bg-white border border-[#e8e8ed] rounded-2xl p-6 shadow-sm flex flex-col h-[380px]">
+                    <!-- Graphique Temporel Principal (starts 2016) -->
+                    <div class="bg-white border border-[#e8e8ed] rounded-2xl p-6 shadow-sm flex flex-col h-[460px]">
                         <h3 class="text-xs font-semibold text-[#1d1d1f] uppercase tracking-wider mb-4 flex items-center gap-2">
                             <i class="fa-solid fa-chart-line text-apple-blue"></i>
-                            Développement cyclable & Part Modale
+                            Développement cyclable & Part Modale (Depuis 2016)
                         </h3>
                         <div class="flex-1 relative min-h-0">
                             <canvas id="chart-correlation"></canvas>
                         </div>
                     </div>
 
-                    <!-- Graphique Nuage de Points & Régression (MULTIDIMENSIONNEL COMPLET) -->
-                    <div class="bg-white border border-[#e8e8ed] rounded-2xl p-6 shadow-sm flex flex-col h-[380px]">
-                        <h3 class="text-xs font-semibold text-[#1d1d1f] uppercase tracking-wider mb-4 flex items-center gap-2">
-                            <i class="fa-solid fa-circle-dot text-purple-500"></i>
-                            Nuage Global & Régression (Tous Millésimes)
-                        </h3>
+                    <!-- Graphique Nuage de Points, Régression & Simulateur d'Impact -->
+                    <div class="bg-white border border-[#e8e8ed] rounded-2xl p-6 shadow-sm flex flex-col h-[460px]">
+                        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                            <h3 class="text-xs font-semibold text-[#1d1d1f] uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-circle-dot text-purple-500"></i>
+                                Nuage Global & Modélisation (Tous Millésimes)
+                            </h3>
+                            <!-- Commandes d'Analyse Avancée -->
+                            <div class="flex items-center space-x-2">
+                                <select id="filter-scatter-typology" class="bg-[#f5f5f7] border border-[#e8e8ed] rounded-lg py-1 px-2.5 text-[10px] font-medium text-[#1d1d1f] focus:border-apple-blue outline-none cursor-pointer">
+                                    <option value="ALL">Toutes Typologies</option>
+                                    <option value="1">Typologie 1</option>
+                                    <option value="2">Typologie 2</option>
+                                    <option value="3">Typologie 3</option>
+                                    <option value="4">Typologie 4</option>
+                                    <option value="default">Non classifié</option>
+                                </select>
+                                <select id="select-regression-type" class="bg-[#f5f5f7] border border-[#e8e8ed] rounded-lg py-1 px-2.5 text-[10px] font-medium text-[#1d1d1f] focus:border-apple-blue outline-none cursor-pointer">
+                                    <option value="linear">Modèle Linéaire</option>
+                                    <option value="polynomial">Modèle Quadratique (Degré 2)</option>
+                                    <option value="logarithmic">Modèle Logarithmique</option>
+                                </select>
+                            </div>
+                        </div>
                         <div class="flex-1 relative min-h-0">
                             <canvas id="chart-scatter"></canvas>
                         </div>
+                        
+                        <!-- Premium Interactive "What-If" Impact Simulator Widget -->
+                        <div class="mt-3 pt-3 border-t border-[#e8e8ed] grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs shrink-0">
+                            <div class="space-y-1.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-apple-gray font-medium">Hausse de cyclabilité simulée :</span>
+                                    <span id="sim-slider-val" class="font-bold text-apple-blue text-sm">+2.0 %</span>
+                                </div>
+                                <input type="range" id="sim-slider" min="0.5" max="15.0" step="0.5" value="2.0" class="w-full h-1 bg-[#e8e8ed] rounded-lg appearance-none cursor-pointer accent-apple-blue outline-none">
+                                <div class="text-[9px] text-apple-gray flex justify-between">
+                                    <span>+0.5 % (Prudent)</span>
+                                    <span>+15.0 % (Ambitieux)</span>
+                                </div>
+                            </div>
+                            <div class="bg-[#f5f5f7] rounded-xl p-3 space-y-1 border border-[#e8e8ed] flex flex-col justify-between">
+                                <div class="flex items-center justify-between text-[9px] font-semibold uppercase tracking-wider">
+                                    <span class="text-apple-gray">Impact estimé (Part Modale)</span>
+                                    <span id="sim-confidence-badge" class="px-2 py-0.5 rounded-full border">Indice</span>
+                                </div>
+                                <div class="text-[13px] font-extrabold text-[#1d1d1f]" id="sim-impact-val">
+                                    +0.00 %
+                                </div>
+                                <div class="flex items-center justify-between text-[9px] text-apple-gray pt-1 border-t border-[#e8e8ed]/60">
+                                    <span>Base : <strong class="text-[#1d1d1f]" id="sim-baseline-val">0.00 %</strong></span>
+                                    <span id="sim-equation-val" class="italic truncate max-w-[130px]">Modèle</span>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
-                    <!-- Graphique d'Analyse Sociologique par Variable (CSP) -->
-                    <div class="bg-white border border-[#e8e8ed] rounded-2xl p-6 shadow-sm flex flex-col h-[380px]">
+                    <!-- Graphique d'Analyse Sociologique par Variable (CSP) - Normalized 100% -->
+                    <div class="bg-white border border-[#e8e8ed] rounded-2xl p-6 shadow-sm flex flex-col h-[460px]">
                         <h3 class="text-xs font-semibold text-[#1d1d1f] uppercase tracking-wider mb-4 flex items-center gap-2">
                             <i class="fa-solid fa-people-group text-apple-green"></i>
-                            Pénétration de l'usage Vélo par Catégorie CSP
+                            Pénétration de l'usage Vélo par Catégorie CSP (Repère Absolu)
                         </h3>
                         <div class="flex-1 relative min-h-0">
                             <canvas id="chart-sociology"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Graphique Impact Territorial vs Socio-Revenu (28 Communes grouped side-by-side) -->
+                    <div class="bg-white border border-[#e8e8ed] rounded-2xl p-6 shadow-sm flex flex-col h-[460px]">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xs font-semibold text-[#1d1d1f] uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-globe text-apple-orange"></i>
+                                Impact Territorial vs Structure Socio-Professionnelle
+                            </h3>
+                            <span class="text-[9px] bg-apple-blue/5 text-apple-blue border border-apple-blue/10 px-2 py-0.5 rounded-full font-medium">Comparatif 28 Communes</span>
+                        </div>
+                        <div class="flex-1 relative min-h-0">
+                            <canvas id="chart-territory"></canvas>
                         </div>
                     </div>
 
@@ -283,6 +344,7 @@
         let chartCorrelation = null;
         let chartSociology = null;
         let chartScatter = null;
+        let chartTerritory = null;
         let animationInterval = null;
         
         let transLabels = {};
@@ -422,6 +484,17 @@
             filterCommune.addEventListener('change', () => {
                 refreshAnalysisAndCharts();
             });
+
+            // Advanced Regression & Scatter controls listeners
+            document.getElementById('select-regression-type').addEventListener('change', () => {
+                refreshAnalysisAndCharts();
+            });
+            document.getElementById('filter-scatter-typology').addEventListener('change', () => {
+                refreshAnalysisAndCharts();
+            });
+            document.getElementById('sim-slider').addEventListener('input', () => {
+                refreshAnalysisAndCharts();
+            });
         }
 
         function setupDropzones() {
@@ -490,7 +563,7 @@
                         let count = 0;
                         rawData.classification = {};
 
-                        // Simple tolerant CSV parser: supports both comma and semi-colon delimiter
+                        // Simple tolerant CSV parser
                         let separator = ';';
                         if (lines[0] && lines[0].includes(',')) {
                             separator = ',';
@@ -562,8 +635,6 @@
 
         // Check if required files are active to transition from Onboarding to Dashboard
         function checkActivationStatus() {
-            // We require SQLite, cyclables, and voirie to launch the engine. 
-            // CSV classification is optional but highly recommended to color the scatter plot.
             if (sqliteDb && rawData.cyclables && rawData.voirie) {
                 document.getElementById('onboarding-screen').classList.add('hidden');
                 document.getElementById('dashboard-content').classList.remove('hidden');
@@ -703,59 +774,157 @@
 
             // Draw premium charts
             renderCorrelationChart(selectedCommune);
-            renderScatterPlot(selectedCommune); // Now depends on commune selection, plotting ALL years
+            renderScatterPlot(selectedCommune); 
             renderSociologyChart(selectedCommune, activeYear);
+            renderTerritoryChart(selectedCommune, activeYear);
         }
 
-        function getRegressionLineDataset(points) {
+        // Advanced custom Mathematical Regression Engine (Linear, Polynomial Deg 2, Logarithmic)
+        function computeRegression(points, type) {
+            if (points.length < 3 && type === 'polynomial') type = 'linear';
             if (points.length < 2) return null;
-            let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
-            const n = points.length;
 
-            for (let i = 0; i < n; i++) {
-                sumX += points[i].x;
-                sumY += points[i].y;
-                sumXY += points[i].x * points[i].y;
-                sumXX += points[i].x * points[i].x;
+            let result = {
+                type: type,
+                predict: null,
+                r2: 0,
+                equation: '',
+            };
+
+            const n = points.length;
+            const xVals = points.map(p => p.x);
+            const yVals = points.map(p => p.y);
+            const meanY = yVals.reduce((a, b) => a + b, 0) / n;
+
+            if (type === 'linear') {
+                let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+                for (let i = 0; i < n; i++) {
+                    sumX += points[i].x;
+                    sumY += points[i].y;
+                    sumXY += points[i].x * points[i].y;
+                    sumXX += points[i].x * points[i].x;
+                }
+                const denom = (n * sumXX) - (sumX * sumX);
+                if (denom === 0) return null;
+                const slope = ((n * sumXY) - (sumX * sumY)) / denom;
+                const intercept = (sumY - (slope * sumX)) / n;
+
+                result.predict = (x) => slope * x + intercept;
+                result.equation = `y = ${slope.toFixed(3)}x ${intercept >= 0 ? '+' : ''} ${intercept.toFixed(3)}`;
+            } 
+            else if (type === 'logarithmic') {
+                const logPoints = points.filter(p => p.x > 0);
+                const m = logPoints.length;
+                if (m < 2) {
+                    return computeRegression(points, 'linear'); // Fallback
+                }
+                let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+                for (let i = 0; i < m; i++) {
+                    const lnX = Math.log(logPoints[i].x);
+                    sumX += lnX;
+                    sumY += logPoints[i].y;
+                    sumXY += lnX * logPoints[i].y;
+                    sumXX += lnX * lnX;
+                }
+                const denom = (m * sumXX) - (sumX * sumX);
+                if (denom === 0) return null;
+                const a = ((m * sumXY) - (sumX * sumY)) / denom;
+                const b = (sumY - (a * sumX)) / m;
+
+                result.predict = (x) => x > 0 ? a * Math.log(x) + b : b;
+                result.equation = `y = ${a.toFixed(3)} ln(x) ${b >= 0 ? '+' : ''} ${b.toFixed(3)}`;
+            } 
+            else if (type === 'polynomial') {
+                // Quadratic regression: y = ax^2 + bx + c
+                let sumX = 0, sumX2 = 0, sumX3 = 0, sumX4 = 0;
+                let sumY = 0, sumXY = 0, sumX2Y = 0;
+
+                for (let i = 0; i < n; i++) {
+                    const xi = points[i].x;
+                    const yi = points[i].y;
+                    const xi2 = xi * xi;
+                    const xi3 = xi2 * xi;
+                    const xi4 = xi3 * xi;
+
+                    sumX += xi;
+                    sumX2 += xi2;
+                    sumX3 += xi3;
+                    sumX4 += xi4;
+                    sumY += yi;
+                    sumXY += xi * yi;
+                    sumX2Y += xi2 * yi;
+                }
+
+                // Normal system: A * X = B
+                const system = [
+                    [sumX4, sumX3, sumX2, sumX2Y],
+                    [sumX3, sumX2, sumX,  sumXY],
+                    [sumX2, sumX,  n,      sumY]
+                ];
+
+                const coeffs = solve3x3Matrix(system);
+                if (!coeffs) {
+                    return computeRegression(points, 'linear'); // Fallback on failure
+                }
+
+                const [a, b, c] = coeffs;
+                result.predict = (x) => a * x * x + b * x + c;
+                result.equation = `y = ${a.toFixed(4)}x² ${b >= 0 ? '+' : ''} ${b.toFixed(3)}x ${c >= 0 ? '+' : ''} ${c.toFixed(3)}`;
             }
 
-            const denominator = (n * sumXX) - (sumX * sumX);
-            if (denominator === 0) return null;
+            // Calculation of determination coefficient (R-squared)
+            let ssRes = 0;
+            let ssTot = 0;
+            for (let i = 0; i < n; i++) {
+                const predY = result.predict(points[i].x);
+                ssRes += Math.pow(points[i].y - predY, 2);
+                ssTot += Math.pow(points[i].y - meanY, 2);
+            }
 
-            const slope = ((n * sumXY) - (sumX * sumY)) / denominator;
-            const intercept = (sumY - (slope * sumX)) / n;
+            result.r2 = ssTot === 0 ? 0 : 1 - (ssRes / ssTot);
+            if (result.r2 < 0) result.r2 = 0; // Bound safely to 0
 
-            const xValues = points.map(p => p.x);
-            const minX = Math.min(...xValues);
-            const maxX = Math.max(...xValues);
+            return result;
+        }
 
-            return {
-                label: 'Tendance globale (Régression)',
-                type: 'line',
-                data: [
-                    { x: minX, y: slope * minX + intercept },
-                    { x: maxX, y: slope * maxX + intercept }
-                ],
-                borderColor: '#1d1d1f',
-                borderWidth: 1.5,
-                borderDash: [5, 5],
-                fill: false,
-                pointRadius: 0,
-                hoverRadius: 0,
-                showLine: true
-            };
+        // Helper: Gaussian elimination for 3x3 augmented matrix to solve quadratic equations
+        function solve3x3Matrix(m) {
+            const n = 3;
+            for (let i = 0; i < n; i++) {
+                let maxRow = i;
+                for (let k = i + 1; k < n; k++) {
+                    if (Math.abs(m[k][i]) > Math.abs(m[maxRow][i])) maxRow = k;
+                }
+                const temp = m[i]; m[i] = m[maxRow]; m[maxRow] = temp;
+
+                if (Math.abs(m[i][i]) < 1e-12) return null; // Singular
+
+                for (let k = i + 1; k < n; k++) {
+                    const factor = m[k][i] / m[i][i];
+                    for (let j = i; j <= n; j++) {
+                        m[k][j] -= factor * m[i][j];
+                    }
+                }
+            }
+
+            const x = new Array(3);
+            for (let i = n - 1; i >= 0; i--) {
+                x[i] = m[i][n] / m[i][i];
+                for (let k = i - 1; k >= 0; k--) {
+                    m[k][n] -= m[k][i] * x[i];
+                }
+            }
+            return x;
         }
 
         function renderScatterPlot(selectedCommune) {
             const ctx = document.getElementById('chart-scatter').getContext('2d');
+            const regType = document.getElementById('select-regression-type').value;
+            const typologyFilter = document.getElementById('filter-scatter-typology').value;
             
             // Map datasets according to classification code (1, 2, 3, 4, and 'default')
             const categorizedPoints = {
-                1: [],
-                2: [],
-                3: [],
-                4: [],
-                'default': []
+                1: [], 2: [], 3: [], 4: [], 'default': []
             };
 
             const targetCommunes = selectedCommune === 'ALL' ? calculatedMetrics.communesList : [selectedCommune];
@@ -767,6 +936,9 @@
 
                 // Determine classification code
                 const typCode = rawData.classification[com] || 'default';
+
+                // Filter points based on Scatter typology filter
+                if (typologyFilter !== 'ALL' && String(typCode) !== String(typologyFilter)) return;
 
                 calculatedMetrics.allYears.forEach(year => {
                     const bike = (calculatedMetrics.bikeLengthsByYear[com] && calculatedMetrics.bikeLengthsByYear[com][year]) || 0;
@@ -798,12 +970,12 @@
 
             // 2. Build datasets list based on typology categories
             const datasets = [];
-            const allActivePlottedPoints = [];
+            const allActivePoints = [];
 
             [1, 2, 3, 4, 'default'].forEach(code => {
                 const pts = categorizedPoints[code];
                 if (pts.length > 0) {
-                    allActivePlottedPoints.push(...pts);
+                    allActivePoints.push(...pts);
                     datasets.push({
                         label: typologyLabels[code],
                         data: pts,
@@ -815,10 +987,42 @@
                 }
             });
 
-            // 3. Add global regression line computed over ALL plotted historical data points
-            const regression = getRegressionLineDataset(allActivePlottedPoints);
-            if (regression) {
-                datasets.push(regression);
+            // 3. Compute and plot advanced regression
+            const regressionResult = computeRegression(allActivePoints, regType);
+            if (regressionResult) {
+                const xValues = allActivePoints.map(p => p.x);
+                const minX = Math.min(...xValues);
+                const maxX = Math.max(...xValues);
+
+                // Create a smooth curve of 40 intervals
+                const curvePoints = [];
+                const steps = 40;
+                for (let i = 0; i <= steps; i++) {
+                    const targetX = minX + (i / steps) * (maxX - minX);
+                    curvePoints.push({ x: targetX, y: regressionResult.predict(targetX) });
+                }
+
+                datasets.push({
+                    label: `Tendance (${regressionResult.type})`,
+                    type: 'line',
+                    data: curvePoints,
+                    borderColor: '#1d1d1f',
+                    borderWidth: 1.5,
+                    borderDash: [5, 5],
+                    fill: false,
+                    pointRadius: 0,
+                    hoverRadius: 0,
+                    showLine: true
+                });
+
+                // Run impact predictor simulation in real-time
+                updatePredictiveSimulation(regressionResult, targetCommunes, typologyFilter);
+            } else {
+                // Clear the simulation widget if data is insufficient
+                document.getElementById('sim-baseline-val').innerText = '-- %';
+                document.getElementById('sim-impact-val').innerText = 'Insuffisant de points pour modéliser';
+                document.getElementById('sim-confidence-badge').className = "hidden";
+                document.getElementById('sim-equation-val').innerText = 'Calcul impossible';
             }
 
             if (chartScatter) chartScatter.destroy();
@@ -844,7 +1048,7 @@
                                 label: function(context) {
                                     const pt = context.raw;
                                     if (context.dataset.type === 'line') return context.dataset.label;
-                                    return `${pt.label} (${pt.year}) : Cyclabilité ${pt.x.toFixed(1)}%, Part Modale ${pt.y.toFixed(1)}%`;
+                                    return `${pt.label} (${pt.year}) : Cyclabilité ${pt.x.toFixed(2)}%, Part Modale ${pt.y.toFixed(2)}%`;
                                 }
                             }
                         }
@@ -867,6 +1071,66 @@
             });
         }
 
+        // Live updating simulation calculations based on custom algebraic model and user slider
+        function updatePredictiveSimulation(regression, targetCommunes, typologyFilter) {
+            const activeYear = parseInt(document.getElementById('time-slider').value);
+            const simDeltaInput = document.getElementById('sim-slider');
+            const deltaX = simDeltaInput ? parseFloat(simDeltaInput.value) : 2.0;
+
+            // Update simulator text value
+            document.getElementById('sim-slider-val').innerText = `+${deltaX.toFixed(1)} %`;
+
+            // Calculate active baseline cyclability
+            let totalRoad = 0;
+            let totalBike = 0;
+
+            targetCommunes.forEach(com => {
+                const typCode = rawData.classification[com] || 'default';
+                if (typologyFilter !== 'ALL' && String(typCode) !== String(typologyFilter)) return;
+
+                totalRoad += calculatedMetrics.roadLengths[com] || 0;
+                totalBike += (calculatedMetrics.bikeLengthsByYear[com] && calculatedMetrics.bikeLengthsByYear[com][activeYear]) || 0;
+            });
+
+            const currentCyclability = totalRoad > 0 ? (totalBike / totalRoad) * 100 : 0;
+            const simulatedCyclability = currentCyclability + deltaX;
+
+            const predBaseline = regression.predict(currentCyclability);
+            const predSimulated = regression.predict(simulatedCyclability);
+            const predictedImpact = predSimulated - predBaseline;
+
+            // Define dynamic confidence indices based on R-Squared limits
+            const r2 = regression.r2;
+            let confText = 'Faible';
+            let confClass = 'bg-red-50 text-red-600 border-red-100';
+            if (r2 >= 0.75) {
+                confText = 'Excellent';
+                confClass = 'bg-emerald-50 text-emerald-600 border-emerald-100';
+            } else if (r2 >= 0.50) {
+                confText = 'Bon';
+                confClass = 'bg-green-50 text-green-600 border-green-100';
+            } else if (r2 >= 0.30) {
+                confText = 'Modéré';
+                confClass = 'bg-amber-50 text-amber-600 border-amber-100';
+            }
+
+            // Bind values to simulator UI elements
+            document.getElementById('sim-baseline-val').innerText = `${currentCyclability.toFixed(2)} %`;
+            document.getElementById('sim-impact-val').innerText = `${predictedImpact >= 0 ? '+' : ''}${predictedImpact.toFixed(2)} % (de ${predBaseline.toFixed(2)}% à ${predSimulated.toFixed(2)}%)`;
+            
+            const badge = document.getElementById('sim-confidence-badge');
+            if (badge) {
+                badge.innerText = `${confText} (R² = ${r2.toFixed(3)})`;
+                badge.className = `px-2 py-0.5 rounded-full border text-[9px] font-semibold tracking-wide uppercase ${confClass}`;
+            }
+
+            const eqVal = document.getElementById('sim-equation-val');
+            if (eqVal) {
+                eqVal.innerText = regression.equation;
+            }
+        }
+
+        // Temporal correlation chart adjusted strictly to begin at 2016
         function renderCorrelationChart(selectedCommune) {
             const ctx = document.getElementById('chart-correlation').getContext('2d');
             
@@ -874,7 +1138,10 @@
             const rawModalSharePoints = [];
             const validLabels = [];
 
-            calculatedMetrics.allYears.forEach(yr => {
+            // Shift timeline start: filter out years before 2016
+            const correlationYears = calculatedMetrics.allYears.filter(yr => yr >= 2016);
+
+            correlationYears.forEach(yr => {
                 // Taux cyclabilité
                 let road = 0;
                 let bike = 0;
@@ -975,6 +1242,7 @@
             });
         }
 
+        // Sociology chart with horizontal indexAxis locked permanently to [0-100%]
         function renderSociologyChart(selectedCommune, activeYear) {
             const ctx = document.getElementById('chart-sociology').getContext('2d');
             const categories = [];
@@ -1040,6 +1308,8 @@
                     },
                     scales: {
                         x: { 
+                            min: 0,
+                            max: 100, // Forces the maximum width of the graph to remain un-distorted
                             grid: { color: '#e8e8ed' }, 
                             ticks: { color: '#86868b', font: { size: 10 } },
                             title: { display: true, text: '% part modale vélo', color: '#86868b', font: { size: 9 } }
@@ -1047,6 +1317,126 @@
                         y: { 
                             grid: { display: false }, 
                             ticks: { color: '#1d1d1f', font: { size: 10, weight: '500' } } 
+                        }
+                    }
+                }
+            });
+        }
+
+        // New 4th spatial analysis comparison chart: Territorial impact vs Socio-Revenu
+        // Plots the 28 communes of the Métropole side-by-side (224 bars) for each CSP, highlighting selected communes
+        function renderTerritoryChart(selectedCommune, activeYear) {
+            const canvas = document.getElementById('chart-territory');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            const cspCategories = ['1', '2', '3', '4', '5', '6', '7', '8'];
+            const cspLabels = cspCategories.map(code => cs1Labels[code] || fallbackCS1[code] || `Groupe ${code}`);
+
+            // Group datasets per Commune, each containing data for the 8 CSP classes
+            const datasets = [];
+
+            if (sqliteDb) {
+                // Bulk query to pull territorial dispersion in a single tick
+                const q = `
+                    SELECT geo, cs1, SUM(CASE WHEN trans = '3' THEN value ELSE 0 END) * 100.0 / NULLIF(SUM(value), 0)
+                    FROM mobpro_agg
+                    WHERE year = ${activeYear} AND cs1 IS NOT NULL AND cs1 != ''
+                    GROUP BY geo, cs1;
+                `;
+
+                try {
+                    const res = sqliteDb.exec(q);
+                    const dataMap = {}; // key: geoInsee -> key: cs1 -> value
+
+                    if (res.length > 0) {
+                        res[0].values.forEach(row => {
+                            const geo = String(row[0]).trim();
+                            let cs1 = String(row[1]).trim();
+                            if (cs1.startsWith('0') && cs1.length > 1) {
+                                cs1 = cs1.substring(1);
+                            }
+                            const val = parseFloat(row[2]) || 0;
+
+                            if (!dataMap[geo]) dataMap[geo] = {};
+                            dataMap[geo][cs1] = val;
+                        });
+                    }
+
+                    // Traverse our 28 registered Bordeaux Métropole communes list to build datasets
+                    calculatedMetrics.communesList.forEach(comNorm => {
+                        const inseeCode = inseeMapping[comNorm] || comNorm;
+                        const communeData = dataMap[inseeCode] || {};
+
+                        const dataPoints = cspCategories.map(code => communeData[code] || 0);
+
+                        // Define highlight rules
+                        const isSelected = (selectedCommune === comNorm);
+                        const isAllMode = (selectedCommune === 'ALL');
+
+                        let bgColor, borderColor, borderWidth;
+
+                        if (isAllMode) {
+                            // Uniform elegant premium color matching the Apple aesthetic
+                            bgColor = 'rgba(0, 113, 227, 0.45)';
+                            borderColor = 'rgba(0, 113, 227, 0.85)';
+                            borderWidth = 1;
+                        } else {
+                            // Highlight only the selected commune, grey-out the background
+                            bgColor = isSelected ? 'rgba(0, 113, 227, 0.9)' : 'rgba(134, 134, 139, 0.1)';
+                            borderColor = isSelected ? '#0071e3' : 'rgba(134, 134, 139, 0.2)';
+                            borderWidth = isSelected ? 1.5 : 0.5;
+                        }
+
+                        datasets.push({
+                            label: comNorm.replace(/_/g, " "),
+                            data: dataPoints,
+                            backgroundColor: bgColor,
+                            borderColor: borderColor,
+                            borderWidth: borderWidth,
+                            borderRadius: 2,
+                            barPercentage: 0.85,
+                            categoryPercentage: 0.9
+                        });
+                    });
+
+                } catch (e) {
+                    console.error("Erreur requêtage impact territorial", e);
+                }
+            }
+
+            if (chartTerritory) chartTerritory.destroy();
+
+            chartTerritory = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: cspLabels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }, // Hide the 28 keys to optimize drawing viewport
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label} : ${context.raw.toFixed(2)} %`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#1d1d1f', font: { size: 9, weight: '500' } }
+                        },
+                        y: {
+                            min: 0,
+                            max: 100, // Normalized baseline comparison
+                            grid: { color: '#e8e8ed' },
+                            ticks: { color: '#86868b', font: { size: 10 } },
+                            title: { display: true, text: 'Part Modale Vélo (%)', color: '#86868b', font: { size: 9 } }
                         }
                     }
                 }
